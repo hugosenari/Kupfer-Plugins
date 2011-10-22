@@ -1,0 +1,44 @@
+{
+    "shortcuts": [
+        {
+            "keys":"Ctrl + Shift + O",
+            "desc": "Organize imports"
+        },
+        {
+            "keys":"Ctrl + Shift + T",
+            "desc" : "Open Type"
+        },
+        {
+            "keys":"Ctrl + Shift + F4",
+            "desc" : "Close all Opened Editors"
+        },
+        {
+            "keys":"Ctrl + O",
+            "desc":"Open declarations"
+        },
+        {
+            "keys":"Ctrl + E",
+            "desc":"Open Editor"
+        },
+        {
+            "keys":"Ctrl + /",
+            "desc":"Line Comment"
+        },
+        {
+            "keys":"Alt + Shift + R",
+            "desc":"Rename"
+        },
+        {
+            "keys":"Alt + Shift + L",
+            "desc":"extract to Local Variable"
+        },
+        {
+            "keys":"Alt + Shift + M",
+            "desc":"extract to Method"
+        },
+        {
+            "keys":"F3",
+            "desc":"Open Declaration"
+        }
+    ]
+}

@@ -1,0 +1,532 @@
+{
+    "shortcuts": [
+        {
+            "desc":"Content Assist",
+            "keys":"control+Space"
+        },
+        {
+            "desc":"Context Information",
+            "keys":"control+shift+Space"
+        },
+        {
+            "desc":"Copy",
+            "keys":"control+C"
+        },
+        {
+            "desc":"Cut",
+            "keys":"control+X"
+        },
+        {
+            "desc":"Delete",
+            "keys":"Delete"
+        },
+        {
+            "desc":"Find and Replace",
+            "keys":"control+F"
+        },
+        {
+            "desc":"Find Next",
+            "keys":"control+K"
+        },
+        {
+            "desc":"Find Previous",
+            "keys":"control+shift+K"
+        },
+        {
+            "desc":"Incremental Find",
+            "keys":"control+J"
+        },
+        {
+            "desc":"Incremental Find Reverse",
+            "keys":"control+shift+J"
+        },
+        {
+            "desc":"Paste",
+            "keys":"control+V"
+        },
+        {
+            "desc":"Quick Diff Toggle",
+            "keys":"control+shift+Q"
+        },
+        {
+            "desc":"Quick Fix",
+            "keys":"control+1"
+        },
+        {
+            "desc":"Redo",
+            "keys":"control+Y"
+        },
+        {
+            "desc":"Restore Last Selection",
+            "keys":"Alt+shift+Down"
+        },
+        {
+            "desc":"Select All",
+            "keys":"control+A"
+        },
+        {
+            "desc":"Select Enclosing Element",
+            "keys":"Alt+shift+Up"
+        },
+        {
+            "desc":"Select Next Element",
+            "keys":"Alt+shift+Right"
+        },
+        {
+            "desc":"Select Previous Element",
+            "keys":"Alt+shift+Left"
+        },
+        {
+            "desc":"Show Tooltip Description",
+            "keys":"F2"
+        },
+        {
+            "desc":"Toggle Insert Mode",
+            "keys":"control+shift+Insert"
+        },
+        {
+            "desc":"Undo",
+            "keys":"control+Z"
+        },
+        {
+            "desc":"Close",
+            "keys":"control+W"
+        },
+        {
+            "desc":"Close All",
+            "keys":"control+shift+W"
+        },
+        {
+            "desc":"Exit",
+            "keys":"Alt+F4"
+        },
+        {
+            "desc":"New",
+            "keys":"control+N"
+        },
+        {
+            "desc":"New menu",
+            "keys":"Alt+shift+N"
+        },
+        {
+            "desc":"Print",
+            "keys":"control+P"
+        },
+        {
+            "desc":"Properties",
+            "keys":"Alt+Enter"
+        },
+        {
+            "desc":"Refresh",
+            "keys":"F5"
+        },
+        {
+            "desc":"Rename",
+            "keys":"F2"
+        },
+        {
+            "desc":"Save",
+            "keys":"control+S"
+        },
+        {
+            "desc":"Save All",
+            "keys":"control+shift+S"
+        },
+        {
+            "desc":"Backward History",
+            "keys":"Alt+Left"
+        },
+        {
+            "desc":"Forward History",
+            "keys":"Alt+Right"
+        },
+        {
+            "desc":"Go to Line",
+            "keys":"control+L"
+        },
+        {
+            "desc":"Go to Matching Bracket",
+            "keys":"control+shift+P"
+        },
+        {
+            "desc":"Go to Next Member",
+            "keys":"control+shift+Down"
+        },
+        {
+            "desc":"Go to Previous Member",
+            "keys":"control+shift+Up"
+        },
+        {
+            "desc":"Last Edit Location",
+            "keys":"control+Q"
+        },
+        {
+            "desc":"Next",
+            "keys":"control+."
+        },
+        {
+            "desc":"Open Call Hierarchy",
+            "keys":"control+Alt+H"
+        },
+        {
+            "desc":"Open Declaration",
+            "keys":"F3"
+        },
+        {
+            "desc":"Open External Javadoc",
+            "keys":"shift+F2"
+        },
+        {
+            "desc":"Open Resource",
+            "keys":"control+shift+R"
+        },
+        {
+            "desc":"Open Structure",
+            "keys":"control+F3"
+        },
+        {
+            "desc":"Open Type",
+            "keys":"control+shift+T"
+        },
+        {
+            "desc":"Open Type Hierarchy",
+            "keys":"F4"
+        },
+        {
+            "desc":"Open Type in Hierarchy",
+            "keys":"control+shift+H"
+        },
+        {
+            "desc":"Previous",
+            "keys":"control+,"
+        },
+        {
+            "desc":"Quick Hierarchy",
+            "keys":"control+T"
+        },
+        {
+            "desc":"Quick Outline",
+            "keys":"control+O"
+        },
+        {
+            "desc":"Build All",
+            "keys":"control+B"
+        },
+        {
+            "desc":"Change Method Signature",
+            "keys":"Alt+shift+C"
+        },
+        {
+            "desc":"Convert Local Variable to Field",
+            "keys":"Alt+shift+F"
+        },
+        {
+            "desc":"Extract Local Variable",
+            "keys":"Alt+shift+L"
+        },
+        {
+            "desc":"Extract Method",
+            "keys":"Alt+shift+M"
+        },
+        {
+            "desc":"Inline",
+            "keys":"Alt+shift+I"
+        },
+        {
+            "desc":"Move - Refactoring ",
+            "keys":"Alt+shift+V"
+        },
+        {
+            "desc":"Redo - Refactoring ",
+            "keys":"Alt+shift+Y"
+        },
+        {
+            "desc":"Refactor Quick Menu",
+            "keys":"Alt+shift+T"
+        },
+        {
+            "desc":"Rename - Refactoring ",
+            "keys":"Alt+shift+R"
+        },
+        {
+            "desc":"Undo - Refactoring",
+            "keys":"Alt+shift+Z"
+        },
+        {
+            "desc":"Debug Last Launched",
+            "keys":"F11"
+        },
+        {
+            "desc":"Display",
+            "keys":"control+shift+D"
+        },
+        {
+            "desc":"Execute",
+            "keys":"control+U"
+        },
+        {
+            "desc":"Inspect",
+            "keys":"control+shift+I"
+        },
+        {
+            "desc":"Resume",
+            "keys":"F8"
+        },
+        {
+            "desc":"Run Last Launched",
+            "keys":"control+F11"
+        },
+        {
+            "desc":"Run to Line",
+            "keys":"control+R"
+        },
+        {
+            "desc":"Step Into",
+            "keys":"F5"
+        },
+        {
+            "desc":"Step Into Selection",
+            "keys":"control+F5"
+        },
+        {
+            "desc":"Step Over",
+            "keys":"F6"
+        },
+        {
+            "desc":"Step Return",
+            "keys":"F7"
+        },
+        {
+            "desc":"Toggle Breakpoint",
+            "keys":"control+shift+B"
+        },
+        {
+            "desc":"Toggle Step Filters",
+            "keys":"shift+F5"
+        },
+        {
+            "desc":"Declaration in WorkSpace",
+            "keys":"control+G"
+        },
+        {
+            "desc":"Occurrences in File",
+            "keys":"control+shift+U"
+        },
+        {
+            "desc":"Open Search Dialog",
+            "keys":"control+H"
+        },
+        {
+            "desc":"References in WorkSpace",
+            "keys":"control+shift+G"
+        },
+        {
+            "desc":"Add Block Comment",
+            "keys":"control+shift+/"
+        },
+        {
+            "desc":"Add Import",
+            "keys":"control+shift+M"
+        },
+        {
+            "desc":"Add Javadoc Comment",
+            "keys":"Alt+shift+J"
+        },
+        {
+            "desc":"Format",
+            "keys":"control+shift+F"
+        },
+        {
+            "desc":"Indent Line",
+            "keys":"control+I"
+        },
+        {
+            "desc":"Mark Occurrences",
+            "keys":"Alt+shift+O"
+        },
+        {
+            "desc":"Organize Imports",
+            "keys":"control+shift+O"
+        },
+        {
+            "desc":"Remove Block Comment",
+            "keys":"control+shift+\\ "
+        },
+        {
+            "desc":"Remove Occurrence Annotations",
+            "keys":"Alt+shift+U"
+        },
+        {
+            "desc":"Source Quick Menu",
+            "keys":"Alt+shift+S"
+        },
+        {
+            "desc":"Toggle Comment",
+            "keys":"control+shift+C"
+        },
+        {
+            "desc":"Collapse",
+            "keys":"control+-"
+        },
+        {
+            "desc":"Copy Lines",
+            "keys":"control+Alt+Down"
+        },
+        {
+            "desc":"Delete Line",
+            "keys":"control+D"
+        },
+        {
+            "desc":"Delete Next Word",
+            "keys":"control+Delete"
+        },
+        {
+            "desc":"Delete Previous Word",
+            "keys":"control+BackSpace"
+        },
+        {
+            "desc":"Duplicate Lines",
+            "keys":"control+Alt+Up"
+        },
+        {
+            "desc":"Expand",
+            "keys":"control++"
+        },
+        {
+            "desc":"Expand All",
+            "keys":"control+*"
+        },
+        {
+            "desc":"Insert Line Above Current Line",
+            "keys":"control+shift+Enter"
+        },
+        {
+            "desc":"Insert Line Below Current Line",
+            "keys":"shift+Enter"
+        },
+        {
+            "desc":"Move Lines Down",
+            "keys":"Alt+Down"
+        },
+        {
+            "desc":"Move Lines Up",
+            "keys":"Alt+Up"
+        },
+        {
+            "desc":"Next Word",
+            "keys":"control+Right"
+        },
+        {
+            "desc":"Previous Word",
+            "keys":"control+Left"
+        },
+        {
+            "desc":"Scroll Line Down",
+            "keys":"control+Down"
+        },
+        {
+            "desc":"Scroll Line Up",
+            "keys":"control+Up"
+        },
+        {
+            "desc":"Select Next Word",
+            "keys":"control+shift+Right"
+        },
+        {
+            "desc":"Select Previous Word",
+            "keys":"control+shift+Left"
+        },
+        {
+            "desc":"Toggle Folding",
+            "keys":"control+/"
+        },
+        {
+            "desc":"Toggle Overwrite",
+            "keys":"Insert"
+        },
+        {
+            "desc":"To Lower Case",
+            "keys":"control+shift+Y"
+        },
+        {
+            "desc":"To Upper Case",
+            "keys":"control+shift+X"
+        },
+        {
+            "desc":"Java Package Explorer",
+            "keys":"Alt+shift+Q+,+P"
+        },
+        {
+            "desc":"Java Type Hierarchy",
+            "keys":"Alt+shift+Q+,+T"
+        },
+        {
+            "desc":"Outline",
+            "keys":"Alt+shift+Q+,+O"
+        },
+        {
+            "desc":"Problems",
+            "keys":"Alt+shift+Q+,+X"
+        },
+        {
+            "desc":"Search",
+            "keys":"Alt+shift+Q+,+S"
+        },
+        {
+            "desc":"Synchronize",
+            "keys":"Alt+shift+Q+,+Y"
+        },
+        {
+            "desc":"Activate Editor",
+            "keys":"F12"
+        },
+        {
+            "desc":"Maximize Active View or Editor",
+            "keys":"control+M"
+        },
+        {
+            "desc":"Next Editor",
+            "keys":"control+F6"
+        },
+        {
+            "desc":"Next Perspective",
+            "keys":"control+F8"
+        },
+        {
+            "desc":"Next View",
+            "keys":"control+F7"
+        },
+        {
+            "desc":"Open Editor Drop Down",
+            "keys":"control+E"
+        },
+        {
+            "desc":"Previous Editor",
+            "keys":"control+shift+F6"
+        },
+        {
+            "desc":"Previous Perspective",
+            "keys":"control+shift+F8"
+        },
+        {
+            "desc":"Previous View",
+            "keys":"control+shift+F7"
+        },
+        {
+            "desc":"Show Ruler Context Menu",
+            "keys":"control+F10"
+        },
+        {
+            "desc":"Show System Menu",
+            "keys":"Alt+-"
+        },
+        {
+            "desc":"Show View Menu",
+            "keys":"control+F10"
+        },
+        {
+            "desc":"Switch to Editor",
+            "keys":"control+shift+E"
+        }
+    ]
+}
