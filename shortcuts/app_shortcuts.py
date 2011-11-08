@@ -16,6 +16,7 @@ from kupfer import utils, uiutils, pretty
 from kupfer.plugin_support import PluginSettings
 from kupfer.obj.base import Action, Leaf
 from kupfer.obj.grouping import ToplevelGroupingSource
+from kupfer.objects import TextLeaf
 
 __kupfer_settings__ = PluginSettings( 
     {

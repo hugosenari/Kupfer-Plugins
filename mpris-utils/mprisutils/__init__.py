@@ -18,9 +18,9 @@ Created on Oct 16, 2011
 @author: hugosenari
 '''
 
-from mprisutils._MprisInterfaces import MprisInterfaces
-from mprisutils._MprisPlayer import MprisPlayer
-from mprisutils._MprisPlaylist import MprisPlaylist
-from mprisutils._MprisTrack import MprisTrack
-from mprisutils._MprisTracklist import MprisTracklist
+from _MprisInterfaces import DbusInterfaces
+from _MprisPlaylist import MprisPlaylist
+from _MprisTrack import MprisTrack
+from _MprisTracklist import MprisTracklist
+from _MprisPlayer import MprisPlayer
 import _MprisUtils as MprisUtils

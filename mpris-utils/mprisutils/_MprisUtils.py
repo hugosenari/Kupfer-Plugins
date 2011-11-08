@@ -47,19 +47,18 @@ def _match_players_uri(name, pattern=None):
         @param pattern=None:  string regexp to test
         @return: boolean
     '''
-    mpattern = MprisInterfaces.MEDIA_PLAYER
+    mpattern = DbusInterfaces.MEDIA_PLAYER
     if pattern == None:
         return re.match(mpattern, name) > 0
     else:
         return re.match(pattern, name) > 0 and re.match(mpattern, name) > 0  
 
 
-
-def iface(obj, dbus_interface=MprisInterfaces.PLAYER):
+def iface(obj, dbus_interface=DbusInterfaces.PLAYER):
     '''
-    Short hand for dbus.Interface(obj, dbus_interface=MprisInterfaces.PLAYER)
+    Short hand for dbus.Interface(obj, dbus_interface=DbusInterfaces.PLAYER)
     '''
-    return dbus.Interface(obj, dbus_interface=dbus_interface)
+    return dbus.Interface(obj.bus_object, dbus_interface=dbus_interface)
 
 def get_properties(obj, prop, interface):
     '''
@@ -73,8 +72,8 @@ def get_properties(obj, prop, interface):
     '''
     ret = None
     try:
-        properties = iface(obj,
-                                dbus_interface=MprisInterfaces.PROPERTIES)
+        properties = iface(obj.bus_object,
+                                dbus_interface=DbusInterfaces.PROPERTIES)
         ret = properties.Get(interface, prop)
     except Exception:
         if not NONE_PROPERTIES:
@@ -93,8 +92,8 @@ def set_properties(obj, prop, val, interface):
     @return: val or Exception
     '''
     try:
-        properties = iface(obj,
-                                dbus_interface=MprisInterfaces.PROPERTIES)
+        properties = iface(obj.bus_object,
+                                dbus_interface=DbusInterfaces.PROPERTIES)
         properties.Set(interface, prop, val)
     except Exception:
         if not NONE_PROPERTIES:
@@ -103,8 +102,8 @@ def set_properties(obj, prop, val, interface):
     return val
 
 def watch_signal(obj, callback, 
-                 signal_name=MprisInterfaces.SIGNAL,
-                 interface=MprisInterfaces.PROPERTIES,
+                 signal_name=DbusInterfaces.SIGNAL,
+                 interface=DbusInterfaces.PROPERTIES,
                  sender_keyword='sender',
                  destination_keyword='destination',
                  interface_keyword='iface',
@@ -114,22 +113,20 @@ def watch_signal(obj, callback,
         Wait for a singal
         @param obj: object to watch
         @param callback: callable object to call when receive signal
-        @param signa_name=MprisInterfaces.SIGNAL: str member name of signal in interface
-        @param interface=MprisInterfaces.PROPERTIES: str interface name of signal
+        @param signa_name=DbusInterfaces.SIGNAL: str member name of signal in interface
+        @param interface=DbusInterfaces.PROPERTIES: str interface name of signal
         return signal_name or Exception   
     '''
-    try:
-        signal = iface(obj, dbus_interface=interface)
-        signal.connect_to_signal(signal_name, callback,
-                                 sender_keyword=sender_keyword, 
-                                 destination_keyword=destination_keyword, 
-                                 interface_keyword=interface_keyword, 
-                                 member_keyword=member_keyword, 
-                                 path_keyword=path_keyword)
-    except Exception:
-        if not NONE_PROPERTIES:
-            raise Exception
-        return Exception
+    print obj, callback
+    print interface, signal_name
+
+    signal = iface(obj)
+    signal.connect_to_signal(signal_name, callback,
+                             sender_keyword=sender_keyword, 
+                             destination_keyword=destination_keyword, 
+                             interface_keyword=interface_keyword, 
+                             member_keyword=member_keyword, 
+                             path_keyword=path_keyword)
     return signal_name
 
 NONE_PROPERTIES = True

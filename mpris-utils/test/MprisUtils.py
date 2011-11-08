@@ -15,9 +15,9 @@ class Test(unittest.TestCase):
 
     def test_get_players_uri(self):
         for uri in MprisUtils.get_players_uri():
-            assert(re.match(MprisInterfaces.MEDIA_PLAYER, uri))
+            assert(re.match(DbusInterfaces.MEDIA_PLAYER, uri))
         for uri in MprisUtils.get_players_uri(".+mpris.+"):
-            assert(re.match(MprisInterfaces.MEDIA_PLAYER, uri))
+            assert(re.match(DbusInterfaces.MEDIA_PLAYER, uri))
     
     def test_get_players(self):
         for player in MprisUtils.get_players(MprisPlayer):

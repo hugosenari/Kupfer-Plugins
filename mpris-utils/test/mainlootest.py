@@ -1,31 +1,25 @@
 
-
-from mprisutils import *
-import unittest
+from _MprisPlayer import MprisPlayer
+import _MprisUtils as MprisUtils
 import dbus
+
 import gobject
 from dbus.mainloop.glib import DBusGMainLoop
 
 DBusGMainLoop(set_as_default=True)
 
 def handler(*args, **keywords):
-    print '{\n    args:['
-    print  '        '+str(args[0]) + ',\n        {'
-    for keyword in args[1]:
-        print '            '+keyword + ': ' + str(args[1].get(keyword)) + ','
-    print '        },\n        '+ str(args[2])
-    print '    ],\n    keywords : {'
-    for keyword in keywords:
-        print '        ' + keyword + ': ' +str(keywords.get(keyword))
-    print '    }\n}\n'
+    print 'handler'
+    print args
+    print keywords
 
     
 def test_watch_signal():
     mloop = gobject.MainLoop()
-    print MprisPlayer.get_players()
     for player in MprisPlayer.get_players():
-        print player.name()
-        MprisUtils.watch_signal(player.get_player(), handler)
+        print player
+        #MprisUtils.watch_signal(player.get_player(), handler)
+        player.get_player().connect_to_signal('Seeked', handler)
     mloop.run()
 
 

@@ -4,7 +4,7 @@ Created on Oct 16, 2011
 @author: hugosenari
 '''
 
-from _MprisInterfaces import MprisInterfaces
+from _MprisInterfaces import DbusInterfaces
 from _MprisPlaylist import MprisPlaylist
 from _MprisTrack import MprisTrack
 from _MprisTracklist import MprisTracklist
@@ -13,15 +13,12 @@ import dbus
 
 
 class MprisPlayer(object):
-    PROPERTIES_CAN_QUIT = 'CanQuit'
-    PROPERTIES_CAN_RAISE = 'CanRaise'
     PROPERTIES_CAN_GO_NEXT = 'CanGoNext'
     PROPERTIES_CAN_GO_PREVIOUS = 'CanGoPrevious'
     PROPERTIES_CAN_PLAY = 'CanPlay'
     PROPERTIES_CAN_PAUSE = 'CanPause'
     PROPERTIES_CAN_SEEK = 'CanSeek'
     PROPERTIES_CAN_CONTROL = 'CanControl'
-    PROPERTIES_HAS_TRACK_LIST = 'HasTrackList'
     PROPERTIES_IDENTITY = 'Identity'
     PROPERTIES_DESKTOP_ENTRY = 'DesktopEntry'
     PROPERTIES_SUPPORTED_URI_SCHEMES = 'SupportedUriSchemes'
@@ -38,11 +35,11 @@ class MprisPlayer(object):
         self.dbus_session = dbus.SessionBus.get_session()
         self.player_uri = player_uri
         self._player = self.dbus_session.get_object(player_uri,
-                                                    MprisInterfaces.OBJECT_PATH)
+                                                    DbusInterfaces.OBJECT_PATH)
         self._playlist = None
         self._calbacks = {}
 
-    def _get_property(self, property, inteface=MprisInterfaces.PLAYER):
+    def _get_property(self, property, inteface=DbusInterfaces.PLAYER):
         try:
             return MprisUtils.get_properties(self._player, property, inteface)
         except Exception:
@@ -50,7 +47,7 @@ class MprisPlayer(object):
                 raise Exception
         return None
 
-    def _set_property(self, property, val, inteface=MprisInterfaces.PLAYER):
+    def _set_property(self, property, val, inteface=DbusInterfaces.PLAYER):
         try:
             return MprisUtils.set_properties(self._player, property,
                                              val, inteface)
@@ -64,7 +61,7 @@ class MprisPlayer(object):
         try:
             return self._get_property(
                                       MprisPlaylist.PROPERTIES_ACTIVE_PLAYLIST,
-                                      MprisInterfaces.PLAYLISTS)
+                                      DbusInterfaces.PLAYLISTS)
         except Exception:
             if not HIDE_DBUS_ERRORS_AND_RETURN_NONE:
                 raise Exception
@@ -87,7 +84,7 @@ class MprisPlayer(object):
                 raise Exception
         return None
     
-    def _receive_signal(*args, **keywords):
+    def _watch_signal(self, *args, **keywords):
         pass
     
     @staticmethod
@@ -140,17 +137,17 @@ class MprisPlayer(object):
     def supported_mine_types(self, on_change=None):
         return self._get_property(
             MprisPlayer.PROPERTIES_SUPPORTED_MINE_TYPES,
-            MprisInterfaces.MEDIA_PLAYER)
+            DbusInterfaces.MEDIA_PLAYER)
 
     def supported_uri_schemes(self, on_change=None):
         return self._get_property(
             MprisPlayer.PROPERTIES_SUPPORTED_URI_SCHEMES,
-            MprisInterfaces.MEDIA_PLAYER)
+            DbusInterfaces.MEDIA_PLAYER)
 
     def name(self):
         return self._get_property(
             MprisPlayer.PROPERTIES_IDENTITY,
-            MprisInterfaces.MEDIA_PLAYER)
+            DbusInterfaces.MEDIA_PLAYER)
 
     def next(self, on_change=None):
         self._player.Next()

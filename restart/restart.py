@@ -67,6 +67,3 @@ class RestartApp(Action):
         max_run_times = app_end_timeout/app_ended_interval
         pretty.print_debug(__name__, 'app_ended_interval %s, app_end_timeout %s, retry %s, max_run_times %s' %(app_ended_interval, app_end_timeout, retry , max_run_times))
         return retry <= max_run_times - 1
-
-    def get_description(self):
-        return _("Restart application")

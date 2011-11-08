@@ -23,14 +23,13 @@ class MprisPlaylist(object):
         self._name = playlst.get('Name')
         self._icon = playlst.get('Icon')
         self._id = playlst.get('Id')
-        self._player = player.get_player()
         self.player = player
 
-    def _get_property(self, property, iface=MprisInterfaces.PLAYLISTS):
-        return MprisUtils.get_properties(self._player, property, iface)
+    def _get_property(self, property, iface=DbusInterfaces.PLAYLISTS):
+        return MprisUtils.get_properties(self.player, property, iface)
 
-    def _set_property(self, property, val, iface=MprisInterfaces.PLAYLISTS):
-        return MprisUtils.set_properties(self._player, property, val, iface)
+    def _set_property(self, property, val, iface=DbusInterfaces.PLAYLISTS):
+        return MprisUtils.set_properties(self.player, property, val, iface)
 
     def name(self):
         return self._name
@@ -42,5 +41,5 @@ class MprisPlaylist(object):
         return self._id
 
     def play(self):
-        pls = MprisUtils.iface(self._player, MprisInterfaces.PLAYLISTS)
+        pls = MprisUtils.iface(self.player._player, DbusInterfaces.PLAYLISTS)
         pls.ActivatePlaylist(self.id())
