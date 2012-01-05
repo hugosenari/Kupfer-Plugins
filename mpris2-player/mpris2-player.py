@@ -116,7 +116,7 @@ class MediaPlayerAction(Action):
         Mpris2Source.set_appleaf_instance(leaf)
         
     def valid_for_uri(self, player_uri, make=None):
-        return make(dbus_uri=player_uri) if make else player_uri
+        return make(dbus_interface_info={'dbus_uri': player_uri}) if make else player_uri
         
 
 class PlayPauseAction(MediaPlayerAction):
@@ -135,7 +135,7 @@ class PlayPauseAction(MediaPlayerAction):
         super(PlayPauseAction, self).activate(leaf)
         
     def valid_for_uri(self, player_uri, make=Player):
-        player = make(dbus_uri=player_uri)
+        player = make(dbus_interface_info={'dbus_uri': player_uri})
         return player if player and player.CanControl else None
 
 
@@ -155,7 +155,7 @@ class NextAction(MediaPlayerAction):
         super(NextAction, self).activate(leaf)
         
     def valid_for_uri(self, player_uri, make=Player):
-        player = make(dbus_uri=player_uri)
+        player = make(dbus_interface_info={'dbus_uri': player_uri})
         return player if player and player.CanGoNext else None
 
 
@@ -175,7 +175,7 @@ class PreviousAction(MediaPlayerAction):
         super(PreviousAction, self).activate(leaf)
         
     def valid_for_uri(self, player_uri, make=Player):
-        player = make(dbus_uri=player_uri)
+        player = make(dbus_interface_info={'dbus_uri': player_uri})
         return player if player and player.CanGoPrevious else None
     
 
@@ -195,7 +195,7 @@ class RaiseAction(MediaPlayerAction):
         super(RaiseAction, self).activate(leaf)
         
     def valid_for_uri(self, player_uri, make=MediaPlayer2):
-        player = make(dbus_uri=player_uri)
+        player = make(dbus_interface_info={'dbus_uri': player_uri})
         return player if player and player.CanRaise else None
     
 
@@ -215,7 +215,7 @@ class SeekAction(MediaPlayerAction):
         super(SeekAction, self).activate(leaf)
         
     def valid_for_uri(self, player_uri, make=Player):
-        player = make(dbus_uri=player_uri)
+        player = make(dbus_interface_info={'dbus_uri': player_uri})
         return player if player and player.CanSeek else None
             
 
@@ -237,7 +237,7 @@ class ShuffleAction(MediaPlayerAction):
         player.Shuffle = not status
         
     def valid_for_uri(self, player_uri, make=Player):
-        player = make(dbus_uri=player_uri)
+        player = make(dbus_interface_info={'dbus_uri': player_uri})
         return player if player and player.CanControl else None
 
 
@@ -264,7 +264,7 @@ class RepeatAction(MediaPlayerAction):
                 player.LoopStatus = Loop_Status.NONE
         
     def valid_for_uri(self, player_uri, make=Player):
-        player = make(dbus_uri=player_uri)
+        player = make(dbus_interface_info={'dbus_uri': player_uri})
         return player if player and player.CanControl else None
 
 class MediaPlayerLeaf(Leaf):
