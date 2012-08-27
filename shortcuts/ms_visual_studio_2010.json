@@ -1,0 +1,273 @@
+/*
+Thanks to microsoft: http://www.microsoft.com/en-us/download/details.aspx?id=13189
+© 2009 Microsoft Corporation. All rights reserved. Microsoft,
+IntelliSense, Visual C#, Visual Studio, and the Visual Studio
+logos are trademarks of the Microsoft group of companies.
+All other trademarks are the property of their
+respective owners.
+*/
+
+{
+    "shortcuts": [
+        {
+            "desc": "Combo EditorContext-",
+                "keys": "CTRL + K, T",
+                "long-desc": ""
+        },
+        {
+            "desc": "Edit.<Direction> ExtendColumn",
+		"keys": "SHIFT + ALT + <ARROW KEY>",
+		"long-desc": ""
+        },
+        {
+            "desc": "Edit.CollapseTo- Definitions",
+		"keys": "CTRL + M, O",
+		"long-desc": "Collapses declaration bodies to provide a high-level view of the types and members in the source file."
+        },
+        {
+            "desc": "Edit.Comment- Selection",
+		"keys": "CTRL + K, C or CTRL + E, C",
+		"long-desc": "Inserts // at the beginning of the current line or every line of the current selection."
+        },
+        {
+            "desc": "Edit.CompleteWord",
+		"keys": "CTRL + SPACEBAR or CTRL + K, W",
+		"long-desc": ""
+        },
+        {
+            "desc": "Edit.Cycle- ClipboardRing",
+		"keys": "CTRL + SHIFT + V",
+		"long-desc": "Pastes text from the Clipboard ring to the caret location in the file. Subsequent use of the shortcut key iterates through the items in the Clipboard ring."
+        },
+        {
+            "desc": "Edit.Find",
+		"keys": "CTRL + F",
+		"long-desc": "Displays the Find Quick tab of the Find and Replace dialog box."
+        },
+        {
+            "desc": "Edit.FindAll- References",
+		"keys": "SHIFT + F12 or CTRL + K, R",
+		"long-desc": "Displays a list of all references for the symbol selected."
+        },
+        {
+            "desc": "Edit.FindInFiles",
+		"keys": "CTRL + SHIFT + F",
+		"long-desc": "Displays the Find in Files tab of the Find and Replace dialog box."
+        },
+        {
+            "desc": "Edit.FindNext- Selected,",
+		"keys": "CTRL + F3",
+		"long-desc": "Sets the search pattern to the selected text, then search in the direction specified."
+        },
+        {
+            "desc": "Edit.FindNext,",
+		"keys": "F3",
+		"long-desc": "Searches again for the last search pattern in the direction specified."
+        },
+        {
+            "desc": "Edit.FindPrevious",
+		"keys": "SHIFT + F3",
+		"long-desc": "Searches again for the last search pattern in the direction specified."
+        },
+        {
+            "desc": "Edit.FindPrevious-Selected",
+		"keys": "CTRL + SHIFT + F3",
+		"long-desc": "Sets the search pattern to the selected text, then search in the direction specified."
+        },
+        {
+            "desc": "Edit.FindSymbol",
+		"keys": "ALT + F12",
+		"long-desc": "Displays the Find Symbol pane of the Find and Replace dialog box."
+        },
+        {
+            "desc": "Edit.Format- Document",
+		"keys": "CTRL + K, D or CTRL + E, D",
+		"long-desc": "Formats the current document according to the indentation and code formatting settings specified on the Formatting pane under Tools | Options | Text Editor | C#."
+        },
+        {
+            "desc": "Edit.Format- Selection",
+		"keys": "CTRL + K, F or CTRL + E, F",
+		"long-desc": "Formats the current selection according to the indentation and code formatting settings specified on the Formatting pane under Tools | Options | Text Editor | C#."
+        },
+        {
+            "desc": "Edit.GoTo",
+		"keys": "CTRL + G",
+		"long-desc": "Displays the Go to Line dialog box."
+        },
+        {
+            "desc": "Edit.GoToBrace",
+		"keys": "CTRL + ]",
+		"long-desc": "Moves the caret location to the matching brace in the source file."
+        },
+        {
+            "desc": "Edit.GoToDefinition",
+		"keys": "F12",
+		"long-desc": "Navigates to the declaration for the selected symbol in code."
+        },
+        {
+            "desc": "Edit.GoToFind-",
+		"keys": "CTRL + /",
+		"long-desc": ""
+        },
+        {
+            "desc": "Edit.GoToNext- Location",
+		"keys": "F8",
+                "long-desc": "Moves the caret to the next item, such as a task in the Task List window or a search match in the Find Results window. Subsequent invocations will move to the next item in the list."
+        },
+        {
+            "desc": "Edit.HideSelection",
+		"keys": "CTRL + M, CTRL + H",
+		"long-desc": "Collapses current selection to an outlining region."
+        },
+        {
+            "desc": "Edit.Incremental- Search",
+		"keys": "CTRL + I",
+		"long-desc": "Activates incremental search. If incremental search is on, but no input is passed, the previous search query is used. If search input has been found, next invocation searches for the next occurrence of the input text."
+        },
+        {
+            "desc": "Edit.InsertSnippet",
+		"keys": "CTRL + K, X",
+		"long-desc": "Displays the Code Snippet Picker. The selected code snippet will be inserted at the caret position."
+        },
+        {
+            "desc": "Edit.InvokeSnippet- FromShortcut",
+		"keys": "TAB",
+		"long-desc": "Inserts the expanded code snippet from the shortcut name."
+        },
+        {
+            "desc": "Edit.ListMembers",
+		"keys": "CTRL + J or CTRL + K, L",
+		"long-desc": ""
+        },
+        {
+            "desc": "Edit.NavigateTo",
+		"keys": "CTRL + COMMA (,)",
+		"long-desc": "Displays the NavigateTo window,"
+        },
+        {
+            "desc": "Edit.ParameterInfo",
+		"keys": "CTRL + SHIFT + SPACEBAR or CTRL K, P",
+		"long-desc": ""
+        },
+        {
+            "desc": "Edit.QuickInfo",
+		"keys": "CTRL + K, I",
+		"long-desc": ""
+        },
+        {
+            "desc": "Edit.Replace",
+		"keys": "CTRL + H",
+		"long-desc": "Displays the replace options in the"
+        },
+        {
+            "desc": "Edit.ReplaceInFiles",
+		"keys": "CTRL + SHIFT + H",
+		"long-desc": "Displays the replace options on the Replace in Files tab of the Find and Replace dialog box."
+        },
+        {
+            "desc": "Edit.StopOutlining",
+		"keys": "CTRL + M, P",
+		"long-desc": "Removes all outlining information from the whole document."
+        },
+        {
+            "desc": "Edit.SurroundWith",
+		"keys": "CTRL + K, S",
+		"long-desc": "Displays the Code Snippet Picker. The selected code snippet will be wrapped around the selected text."
+        },
+        {
+            "desc": "Edit.Toggle- CompletionMode",
+		"keys": "CTRL + ALT + SPACEBAR",
+		"long-desc": ""
+        },
+        {
+            "desc": "Edit.Toggle- OutliningExpansion",
+		"keys": "CTRL + M, M",
+		"long-desc": "Toggles the currently selected collapsed region between the collapsed and expanded state."
+        },
+        {
+            "desc": "Edit.ToggleAll- Outlining",
+		"keys": "CTRL + M, L",
+		"long-desc": "Toggles all previously collapsed outlining regions between collapsed and expanded states."
+        },
+        {
+            "desc": "Edit.Uncomment- Selection",
+		"keys": "CTRL + K, U or CTRL + E, U",
+		"long-desc": "Removes the // at the beginning of the current line or every line of the current selection."
+        },
+        {
+            "desc": "File.NewProject",
+		"keys": "CTRL + SHIFT + N",
+		"long-desc": ""
+        },
+        {
+            "desc": "File.OpenProject",
+		"keys": "CTRL + SHIFT + O",
+		"long-desc": ""
+        },
+        {
+            "desc": "Make Completion",
+		"keys": "CTRL",
+		"long-desc": ""
+        },
+        {
+            "desc": "Project.Add- ExistingItem",
+		"keys": "SHIFT + ALT + A",
+		"long-desc": ""
+        },
+        {
+            "desc": "Project.Add- NewItem",
+		"keys": "CTRL + SHIFT + A",
+		"long-desc": ""
+        },
+        {
+            "desc": "Project.AddClass",
+		"keys": "SHIFT + ALT + C",
+		"long-desc": ""
+        },
+        {
+            "desc": "View.Forward- BrowseContext",
+		"keys": "CTRL + SHIFT + 7",
+		"long-desc": "Moves to the next item called in code in the current file.  Uses the  Go To Definition navigation stack."
+        },
+        {
+            "desc": "View.Navigate- Backward",
+		"keys": "CTRL + HYPHEN (-)",
+		"long-desc": "Moves to the previously browsed line of code."
+        },
+        {
+            "desc": "View.Navigate- Forward",
+		"keys": "CTRL + SHIFT + HYPHEN (-)",
+		"long-desc": "Moves to the next browsed line of code."
+        },
+        {
+            "desc": "View.PopBrowse- Context",
+		"keys": "CTRL + SHIFT + 8",
+		"long-desc": "Moves to the previous item called in code in the current file.  Uses the  Go To Definition navigation stack."
+        },
+        {
+            "desc": "View.Show- SmartTag",
+		"keys": "CTRL + PERIOD (.) or SHIFT + ALT + F10",
+		"long-desc": "Displays the available options on the Smart Tag menu. files, types, and at the caret seeds the search."
+        },
+        {
+            "desc": "View.ViewCode",
+		"keys": "F7",
+		"long-desc": "Displays the selected item in Code view of the editor."
+        },
+        {
+            "desc": "View.ViewDesigner, View.ViewMarkup",
+                "keys": "SHIFT + F7",
+                "long-desc": "Switches between Design and Source views for the current document"
+        },
+        {
+            "desc": "Window.MoveTo- NavigationBar",
+                "keys": "CTRL + F2",
+                "long-desc": "Moves focus to the drop-down bar located at the top of the editor when the editor is in Code view or Server Code view."
+        },
+        {
+            "desc": "Window.ShowEz- MDIFileList",
+                "keys": "CTRL + ALT + DOWN ARROW",
+                "long-desc": ""
+        }
+    ]
+}
