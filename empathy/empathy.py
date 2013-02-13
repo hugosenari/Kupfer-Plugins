@@ -12,7 +12,7 @@ import time
 
 from kupfer import icons
 from kupfer import plugin_support
-from kupfer import pretty, scheduler
+from kupfer import pretty
 from kupfer.objects import Leaf, Action, Source, AppLeaf
 from kupfer.weaklib import dbus_signal_connect_weakly
 from kupfer.obj.helplib import PicklingHelperMixin
@@ -74,7 +74,7 @@ def _create_dbus_connection():
 		dbus_iface = dbus.Interface(proxy_obj, DBUS_PROPS_IFACE)
 		return dbus_iface
 	except dbus.DBusException as exc:
-		pretty.print_exc(__name__)
+		pretty.print_error(__name__, type(exc).__name__, exc)
 
 
 class EmpathyContact(JabberContact):
@@ -88,6 +88,9 @@ class EmpathyContact(JabberContact):
 
 	def get_gicon(self):
 		return icons.ComposedIconSmall(self.get_icon_name(), "empathy")
+	
+	def __cmp__(self, o):
+		return type(o) == EmpathyContact and self.repr_key() == o.repr_key()
 
 
 class AccountStatus(Leaf):
@@ -136,20 +139,24 @@ class ChangeStatus(Action):
 		bus = dbus.SessionBus()
 		interface = _create_dbus_connection()
 		for valid_account in interface.Get(ACCOUNTMANAGER_IFACE, "ValidAccounts"):
-			account = bus.get_object(ACCOUNTMANAGER_IFACE, valid_account)
-			connection_status = account.Get(ACCOUNT_IFACE, "ConnectionStatus")
-			if connection_status != 0:
-				continue
-
-			if iobj.object == "offline":
-				false = dbus.Boolean(0, variant_level=1)
-				account.Set(ACCOUNT_IFACE, "Enabled", false)
-			else:
-				connection_path = account.Get(ACCOUNT_IFACE, "Connection")
-				connection_iface = connection_path.replace("/", ".")[1:]
-				connection = bus.get_object(connection_iface, connection_path)
-				simple_presence = dbus.Interface(connection, SIMPLE_PRESENCE_IFACE)
-				simple_presence.SetPresence(iobj.object, _STATUSES.get(iobj.object))
+			#ignore fails by account
+			try:
+				account = bus.get_object(ACCOUNTMANAGER_IFACE, valid_account)
+				connection_status = account.Get(ACCOUNT_IFACE, "ConnectionStatus")
+				if connection_status != 0:
+					continue
+	
+				if iobj.object == "offline":
+					false = dbus.Boolean(0, variant_level=1)
+					account.Set(ACCOUNT_IFACE, "Enabled", false)
+				else:
+					connection_path = account.Get(ACCOUNT_IFACE, "Connection")
+					connection_iface = connection_path.replace("/", ".")[1:]
+					connection = bus.get_object(connection_iface, connection_path)
+					simple_presence = dbus.Interface(connection, SIMPLE_PRESENCE_IFACE)
+					simple_presence.SetPresence(iobj.object, _STATUSES.get(iobj.object))
+			except dbus.DBusException, exc:
+				pretty.print_error(__name__, type(exc).__name__, exc)
 
 	def item_types(self):
 		yield AppLeaf
@@ -167,19 +174,15 @@ class ChangeStatus(Action):
 		return StatusSource()
 
 
-class ContactsSource(AppLeafContentMixin, ToplevelGroupingSource, 
+class ContactsSource(AppLeafContentMixin, ToplevelGroupingSource,
 		PicklingHelperMixin):
 	''' Get contacts from all on-line accounts in Empathy via DBus '''
 	appleaf_content_id = 'empathy'
 
 	def __init__(self, name=_('Empathy Contacts')):
 		super(ContactsSource, self).__init__(name, "Contacts")
-		self._version = 2
+		self._version = 3
 		self.unpickle_finish()
-		self._contacts = []
-	
-	def is_dynamic(self):
-		return True
 
 	def pickle_prepare(self):
 		self._contacts = []
@@ -192,53 +195,83 @@ class ContactsSource(AppLeafContentMixin, ToplevelGroupingSource,
 		ToplevelGroupingSource.initialize(self)
 
 	def get_items(self):
-		return self._find_all_contacts()
-
-	def _find_all_contacts(self):
-		self.output_debug("Seeking for contacts")
 		interface = _create_dbus_connection()
-		show_offline = __kupfer_settings__["show_offline"]
+		if interface is not None:
+			self._find_all_contacts(interface)
+			
+		if self._contacts is not None:
+			return self._contacts
+		return []
+
+	def _find_all_contacts(self, interface):
 		bus = dbus.SessionBus()
 		for valid_account in interface.Get(ACCOUNTMANAGER_IFACE, "ValidAccounts"):
-			account = bus.get_object(ACCOUNTMANAGER_IFACE, valid_account)
-			connection_status = account.Get(ACCOUNT_IFACE, "ConnectionStatus")
-			if connection_status != 0:
-				continue
+			try: #ignore account errors
+				account = bus.get_object(ACCOUNTMANAGER_IFACE, valid_account)
+				connection_status = account.Get(ACCOUNT_IFACE, "ConnectionStatus")
+				if connection_status != 0:
+					continue
 
-			connection_path = account.Get(ACCOUNT_IFACE, "Connection")
-			connection_iface = connection_path.replace("/", ".")[1:]
-			connection = bus.get_object(connection_iface, connection_path)
-			channels = connection.ListChannels()
-			for channel in channels:
-				contact_group = bus.get_object(connection_iface, channel[0])
-				try:
+				connection_path = account.Get(ACCOUNT_IFACE, "Connection")
+				connection_iface = connection_path.replace("/", ".")[1:]
+				connection = bus.get_object(connection_iface, connection_path)
+				connection.ListChannels(
+					reply_handler=lambda *args, **kwds:
+						self._reply_handle_channels({
+							'connection':connection,
+							'connection_iface':connection_iface,
+							'bus':bus,
+							'valid_account':valid_account}, *args, **kwds),
+					error_handler=lambda *args, **kwds:
+						self._error_handle_channels(*args, **kwds),)
+			except dbus.DBusException, exc:
+				pretty.print_error(__name__, type(exc).__name__, exc)
+	
+	def _reply_handle_channels(self, opts, channels, *args, **kwds):
+		show_offline = __kupfer_settings__["show_offline"]
+		csize = len(self._contacts)
+		for channel in channels:
+			try: #ignore channel errors
+				contact_group = opts['bus'].get_object(opts['connection_iface'], channel[0])
+				contacts = None
+				
+				if str(contact_group).find('ImChannel') < 0:
 					contacts = contact_group.Get(CHANNEL_GROUP_IFACE, "Members")
-				except dbus.exceptions.DBusException, ex:
-					self.output_debug(ex, channel[0])
-					contacts = None
 				if contacts:
-						contacts = [c for c in contacts]
-						contact_attributes = connection.Get(CONTACT_IFACE, "ContactAttributeInterfaces")
-						contact_attributes = [str(a) for a in contact_attributes]
-						contact_details = connection.GetContactAttributes(contacts, contact_attributes, False)
-						for contact, details in contact_details.iteritems():
-								try:
-									status_code = details[_ATTRIBUTES.get("presence")][1]
-								except KeyError, ex:
-									self.output_info('Presence could not be established with %s. Leaving unknown.' % ex)
-									status_code = u'unknown'
-								if not show_offline and status_code == 'offline':
-									continue
-								self._contacts.append(EmpathyContact(
-										details[_ATTRIBUTES.get("jid")],
-										details[_ATTRIBUTES.get("alias")],
-										_STATUSES.get(status_code),
-										'', # empathy does not provide resource here AFAIK
-										valid_account,
-										contact))
-		self.output_info('Total of contacts loaded by empathy plugin', len(self._contacts))							
+					contacts = [c for c in contacts]
+					contact_attributes = opts['connection'].Get(CONTACT_IFACE, "ContactAttributeInterfaces")
+					contact_attributes = [str(a) for a in contact_attributes]			
+					contact_details = opts['connection'].GetContactAttributes(contacts, contact_attributes, False)
+					for contact, details in contact_details.iteritems():
+						try: #ignore contact errors
+							status_code = details.get(
+								_ATTRIBUTES.get("presence"),
+								[None , 'offline']
+							)[1]
+							if not show_offline and status_code == 'offline':
+								continue
+							empathyContact = EmpathyContact(
+								details[_ATTRIBUTES.get("jid")],
+								details[_ATTRIBUTES.get("alias")],
+								_STATUSES.get(status_code),
+								'', # empathy does not provide resource here AFAIK
+								opts['valid_account'],
+								contact)
+							if empathyContact in self._contacts:
+								self._contacts[self._contacts.index(empathyContact)] = empathyContact
+							else:
+								self._contacts.append(empathyContact)
+							
+						except dbus.DBusException, exc:
+							pretty.print_error(__name__, type(exc).__name__, exc)
+			except dbus.DBusException, exc:
+				pretty.print_error(__name__, type(exc).__name__, exc)
+		if csize == self._contacts:
+			return None
 		self.mark_for_update()
-		return self._contacts
+
+	def _error_handle_channels(self, *args, **kwds):
+		pretty.print_error(__name__, *args, **kwds)
 
 	def get_icon_name(self):
 		return 'empathy'
@@ -258,3 +291,4 @@ class StatusSource(Source):
 
 	def provides(self):
 		yield AccountStatus
+
