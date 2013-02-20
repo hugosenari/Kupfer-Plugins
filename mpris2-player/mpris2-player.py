@@ -12,7 +12,8 @@ __kupfer_actions__ = ('PlayPauseAction',
                       'RaiseAction',
                       'SeekAction',
                       'ShuffleAction',
-                      'OpenUriAction',)
+                      'InfoAction',
+                      'PlayerOpenUriAction',)
 __description__ = _("Control any mpris2 media player\n\n Default player changes to last media player you use.")
 __version__ = "0.1"
 __author__ = "Hugo Ribeiro"
@@ -48,12 +49,50 @@ PLUGIN_PLAYERS = {
 #    'gmusicbrowser' : 'gmusicbrowser'
 }
 
+##LEAF
+
+class MediaPlayerLeaf(Leaf):
+    def __init__(self, obj, name, mpris_uri):
+        super(MediaPlayerLeaf, self).__init__(obj, name)
+        self.mpris_uri = mpris_uri
+
+
+class MediaLeaf(MediaPlayerLeaf):
+    serializable = 1
+    def __init__(self, media_metadata, mpris_uri=None):
+        '''
+        @Metadata_Map: mpris2.types.Metadata_Map 
+        '''
+        name = media_metadata[Metadata_Map.TITLE]
+        super(MediaLeaf, self).__init__(media_metadata, name, mpris_uri)
+        self.uri = media_metadata[Metadata_Map.URL]
+        
+    def get_text_representation(self):
+        try:
+            return self.object[Metadata_Map.AS_TEXT]
+        except:
+            return self.object[Metadata_Map.TITLE] + ' - ' + ' - '.join(self.object[Metadata_Map.ARTIST])
+
+    def get_description(self):
+        return ' - '.join(self.object[Metadata_Map.ARTIST])
+
+    def repr_key(self):
+        return self.uri
+
+    def get_icon_name(self):
+        return "audio-x-generic"
+
+
+##/LEAF
+
+
+##SOURCE
 
 class Mpris2Source (Source):
     instance = None
     #appleaf_content_id = __kupfer_settings__["default_mpris2_player"]
     def __init__(self):
-        Source.__init__(self, _("Media Players History"))
+        super(Mpris2Source, self).__init__("Media Players History")
 
     @staticmethod
     def get_appleaf_instance():
@@ -96,17 +135,36 @@ class Mpris2Source (Source):
     
     def get_icon_name(self):
         return "multimedia-player"
+    
 
+class MediaLeafSource(Source):
+    def __init__(self, player, player_uri):
+        self.player = player
+        self.player_uri = player_uri
+        super(MediaLeafSource, self).__init__(_("Media Info"))
+        
+    def get_items(self):
+        self.player
+        yield MediaLeaf(self.player.Metadata, self.player_uri)
+    
+    def provides(self):
+        yield MediaLeaf
+
+
+##/SOURCE
+
+
+##ACTION
+##MEDIA_PLAYER_ACTION
 
 class MediaPlayerAction(Action):
     def __init__(self, name):
-        Action.__init__(self, name)
+        super(MediaPlayerAction, self).__init__(name)
     
     def valid_for_item(self, leaf, *args, **kw):
-        for player_uri in get_players_uri():
-            if leaf.repr_key() in player_uri:
-                Mpris2Source.add_action(self)
-                return self.valid_for_uri(player_uri,  *args, **kw)
+        for player_uri in get_players_uri(".+" + leaf.repr_key()):
+            Mpris2Source.add_action(self)
+            return self.valid_for_uri(player_uri,  *args, **kw)
         return None
         
     def item_types(self):
@@ -117,11 +175,11 @@ class MediaPlayerAction(Action):
         
     def valid_for_uri(self, player_uri, make=None):
         return make(dbus_interface_info={'dbus_uri': player_uri}) if make else player_uri
-        
+
 
 class PlayPauseAction(MediaPlayerAction):
     def __init__(self):
-        MediaPlayerAction.__init__(self, _("Play/Pause"))
+        super(PlayPauseAction, self).__init__(_("Play/Pause"))
     
     def get_description(self):
         return _("Play/Pause current song")
@@ -141,7 +199,7 @@ class PlayPauseAction(MediaPlayerAction):
 
 class NextAction(MediaPlayerAction):
     def __init__(self):
-        MediaPlayerAction.__init__(self, _("Next"))
+        super(NextAction, self).__init__(_("Next"))
     
     def get_description(self):
         return _("Jump to next track")
@@ -161,7 +219,7 @@ class NextAction(MediaPlayerAction):
 
 class PreviousAction(MediaPlayerAction):
     def __init__(self):
-        MediaPlayerAction.__init__(self, _("Previous"))
+        super(PreviousAction, self).__init__(_("Previous"))
     
     def get_description(self):
         return _("Jump to previous track")
@@ -181,7 +239,7 @@ class PreviousAction(MediaPlayerAction):
 
 class RaiseAction(MediaPlayerAction):
     def __init__(self):
-        MediaPlayerAction.__init__(self, _("Raise"))
+        super(RaiseAction, self).__init__(_("Raise"))
     
     def get_description(self):
         return _("Raise player")
@@ -201,7 +259,7 @@ class RaiseAction(MediaPlayerAction):
 
 class SeekAction(MediaPlayerAction):
     def __init__(self):
-        MediaPlayerAction.__init__(self, _("Seek"))
+        super(SeekAction, self).__init__(_("Seek"))
     
     def get_description(self):
         return _("Seek current song")
@@ -217,11 +275,11 @@ class SeekAction(MediaPlayerAction):
     def valid_for_uri(self, player_uri, make=Player):
         player = make(dbus_interface_info={'dbus_uri': player_uri})
         return player if player and player.CanSeek else None
-            
+
 
 class ShuffleAction(MediaPlayerAction):
     def __init__(self):
-        MediaPlayerAction.__init__(self, _("Toggle Shuffle"))
+        super(ShuffleAction, self).__init__(_("Toggle Shuffle"))
     
     def get_description(self):
         return _("Toggle shuffle on/off")
@@ -243,7 +301,7 @@ class ShuffleAction(MediaPlayerAction):
 
 class RepeatAction(MediaPlayerAction):
     def __init__(self):
-        MediaPlayerAction.__init__(self, _("Repeat"))
+        super(RepeatAction, self).__init__(_("Repeat"))
     
     def get_description(self):
         return _("Toggle repeat status none/track/playlist")
@@ -267,29 +325,52 @@ class RepeatAction(MediaPlayerAction):
         player = make(dbus_interface_info={'dbus_uri': player_uri})
         return player if player and player.CanControl else None
 
-class MediaPlayerLeaf(Leaf):
-    def __init__(self, obj, name, mpris_uri):
-        super(MediaPlayerLeaf, self).__init__(obj, name)
-        self.mpris_uri = mpris_uri
 
-class MediaAction(MediaPlayerAction):
+class InfoAction(MediaPlayerAction):
+    def __init__(self):
+        super(InfoAction, self).__init__(_("Now playing..."))
+        self.player_uri = None
+
+    def is_factory(self):
+        return True
+
+    def get_description(self):
+        return _("Return now playing media data")
+    
+    def get_icon_name(self):
+        return "audio-x-generic"
+    
+    def activate(self, leaf):
+        super(InfoAction, self).activate(leaf)
+        player = self.valid_for_item(leaf, Player)
+        if player:
+            player_uri = get_players_uri(".+" + leaf.repr_key())[0]
+            return MediaLeafSource(player, player_uri)
+        
+    def valid_for_uri(self, player_uri, make=Player):
+        player = make(dbus_interface_info={'dbus_uri': player_uri})
+        return player if player and player.CanControl else None
+
+
+##/MEDIA_PLAYER_ACTION
+
+
+##MEDIA_ACTION
+
+class MediaAction(Action):
     def __init__(self, name):
         super(MediaAction, self).__init__(name)
-        
-    def valid_for_item(self, leaf, *args):
-        for player_uri in get_players_uri():
-            if leaf.mpris_uri in player_uri:
-                Mpris2Source.add_action(self)
-                return self.valid_for_uri(leaf.mpris_uri,  *args)
-        return None
 
     def item_types(self):
-        yield MediaPlayerLeaf
         yield MediaLeaf
 
-class OpenUriAction(MediaAction):
+    def get_player(self, leaf):
+        return Player(dbus_interface_info={'dbus_uri': leaf.mpris_uri})
+
+
+class PlayerOpenUriAction(MediaAction):
     def __init__(self):
-        super(OpenUriAction, self).__init__(_("Open Media"))
+        super(PlayerOpenUriAction, self).__init__(_("Open Media"))
         
     def get_description(self):
         return _("Play this media")
@@ -298,49 +379,16 @@ class OpenUriAction(MediaAction):
         return "media-playback-start"
     
     def ativate(self, leaf):
-        if issubclass(type(leaf), MediaLeaf):
-            player = self.valid_for_item(leaf, Player)
-            if player:
-                player.OpenUri(leaf.uri)
+        pretty.print_debug(__name__, 'ativate', leaf)
+        player = self.get_player(leaf)
+        if player:
+            player.OpenUri(leaf.uri)
+
+    def valid_for(self, leaf):
+        player = self.get_player(leaf)
+        pretty.print_debug(__name__, 'valid for', player and player.CanControl)
+        return player if player and player.CanControl else None
 
 
-class MediaLeaf(MediaPlayerLeaf):
-    serializable = 1
-    def __init__(self, media_metadata, mpris_uri, name=None):
-        '''
-        @Metadata_Map: mpris2.types.Metadata_Map 
-        '''
-        name = name or media_metadata[Metadata_Map.TITLE]
-        super(MediaLeaf, self).__init__(self, media_metadata, name, mpris_uri)
-        self.uri = media_metadata[Metadata_Map.URL]
-        self.player = player
-
-    def repr_key(self):
-        return self.uri
-
-    def get_actions(self):
-        yield OpenUriAction
-
-    def get_icon_name(self):
-        return "audio-x-generic"
-    
-
-class MediaLeaf(MediaPlayerLeaf):
-    serializable = 1
-    def __init__(self, media_metadata, mpris_uri, name=None):
-        '''
-        @Metadata_Map: mpris2.types.Metadata_Map 
-        '''
-        name = name or media_metadata[Metadata_Map.TITLE]
-        super(MediaLeaf, self).__init__(self, media_metadata, name, mpris_uri)
-        self.uri = media_metadata[Metadata_Map.URL]
-        self.player = player
-
-    def repr_key(self):
-        return self.uri
-
-    def get_actions(self):
-        yield OpenUriAction
-
-    def get_icon_name(self):
-        return "audio-x-generic"
+##/MEDIA_ACTION
+##/ACTION
