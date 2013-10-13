@@ -1,6 +1,6 @@
 
 #read plugin api:
-# http://kaizer.se/wiki/kupfer/PluginAPI.html
+# http://engla.github.io/kupfer/Documentation/PluginAPI.html
 
 __kupfer_name__ = _("PLUGIN_NAME")
 __version__ = "0.1"

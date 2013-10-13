@@ -12,3 +12,4 @@ remmina - list remmina hosts (similar to ssh plugin)
 shortcut - list and execute shortcuts of some application (require xdotool)
 eclipse - call eclipse common task
 snippets - search and copy snippets with online service
+git - git commands for kupfer
