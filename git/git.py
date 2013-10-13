@@ -58,8 +58,7 @@ class GitActions(Action):
     def valid_for_item(self, leaf):
         cwd = leaf.canonical_path() if leaf.is_dir else \
             os.path.dirname(leaf.canonical_path())
-        status = git_root(cwd)
-        return status
+        return git_is_repo_dir(cwd)
 
     def is_factory(self):
         return True
@@ -252,6 +251,16 @@ def git_root(file_path):
     rev_parse = git.bake('rev-parse')
     roots = rev_parse('--show-toplevel', _cwd=file_path)
     return fil_clean_output(roots).next()
+
+
+def git_is_repo_dir(file_path):
+    '''Return git root dir name'''
+    rev_parse = git.bake('rev-parse')
+    try:
+        roots = rev_parse('--show-toplevel', _cwd=file_path)
+        return bool(fil_clean_output(roots).next())
+    except:
+        return False
 
 
 # git generators consumer
