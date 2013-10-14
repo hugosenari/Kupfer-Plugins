@@ -5,7 +5,7 @@ __description__ = _("""
     Git plugin for kupfer
 """)
 __kupfer_actions__ = ('GitActions', 'GitkAction',
-    'ChangeBranchAction', 'CreateBranchAction',
+    'ChangeBranchAction', 'CreateBranchAction', 'FetchBranchAction',
     'CommitAction', 'CommitRecursiveAction')
 
 
@@ -13,7 +13,7 @@ from kupfer.objects import Action, Leaf, FileLeaf, Source, \
     TextLeaf, TextSource
 from kupfer import uiutils
 from sh import git, gitk, ErrorReturnCode
-import os
+from os import path
 
 
 # utils function
@@ -41,6 +41,13 @@ def generator(fn):
     return generated
 
 
+def dir_path(file_path):
+    is_dir = path.isdir(file_path)
+    parent_dir = path.dirname(file_path)
+    result = file_path if is_dir else parent_dir
+    return result
+
+
 # actions
 
 class GitActions(Action):
@@ -49,16 +56,14 @@ class GitActions(Action):
         Action.__init__(self, _("Git Actions"))
 
     def activate(self, leaf):
-        cwd = leaf.canonical_path() if leaf.is_dir else \
-            os.path.dirname(leaf.canonical_path())
-        return GitStatusLeaf(leaf, cwd)
+        return GitStatusLeaf(leaf)
 
     def item_types(self):
         yield FileLeaf
+        yield BranchSource
 
     def valid_for_item(self, leaf):
-        cwd = leaf.canonical_path() if leaf.is_dir else \
-            os.path.dirname(leaf.canonical_path())
+        cwd = leaf.canonical_path()
         return git_is_repo_dir(cwd)
 
     def is_factory(self):
@@ -77,8 +82,8 @@ class ChangeBranchAction(Action):
         yield GitStatusLeaf
 
     def activate(self, leaf, rleaf):
-        git_ch_branch(leaf.cwd, rleaf.name, rleaf.remote, False)
-        return GitStatusLeaf(leaf.object['file'], leaf.cwd)
+        git_ch_branch(leaf.abs_path, rleaf.name, rleaf.remote, False)
+        return GitStatusLeaf(leaf.object)
 
     def object_types(self):
         yield GitBranchLeaf
@@ -96,6 +101,27 @@ class ChangeBranchAction(Action):
         return True
 
 
+class FetchBranchAction(Action):
+
+    def __init__(self):
+        Action.__init__(self, _('Fetch'))
+
+    def item_types(self):
+        yield GitStatusLeaf
+
+    def activate(self, leaf, rleaf):
+        git_fetch(rleaf.remote, rleaf.name, leaf.abs_path)
+
+    def object_types(self):
+        yield GitBranchLeaf
+
+    def object_source(self, for_item=None):
+        return BranchSource(for_item, fil_remove_local)
+
+    def requires_object(self):
+        return True
+
+
 class CreateBranchAction(Action):
 
     def __init__(self):
@@ -106,7 +132,7 @@ class CreateBranchAction(Action):
 
     def activate(self, leaf, rleaf):
         git_ch_branch(leaf.cwd, rleaf.object, None)
-        return GitStatusLeaf(leaf.object['file'], leaf.cwd)
+        return GitStatusLeaf(leaf.object)
 
     def object_types(self):
         yield TextLeaf
@@ -133,8 +159,12 @@ class CommitAction(Action):
         yield GitStatusLeaf
 
     def activate(self, leaf, rleaf):
-        git_commit(leaf.cwd, rleaf.object, False)
-        return GitStatusLeaf(leaf.object['file'], leaf.cwd)
+        git_commit(leaf.abs_path, rleaf.object, False)
+        return GitStatusLeaf(leaf.object)
+
+    def valid_for_item(self, leaf):
+        result = git_has_changes(leaf.abs_path)
+        return result
 
     def object_types(self):
         yield TextLeaf
@@ -161,8 +191,12 @@ class CommitRecursiveAction(Action):
         yield GitStatusLeaf
 
     def activate(self, leaf, rleaf):
-        git_commit(leaf.cwd, rleaf.object)
-        return GitStatusLeaf(leaf.object['file'], leaf.cwd)
+        git_commit(self.abs_path, rleaf.object, leaf.file_name)
+        return GitStatusLeaf(leaf.object)
+
+    def valid_for_item(self, leaf):
+        result = git_has_changes(dir_path(leaf.abs_path))
+        return result
 
     def object_types(self):
         yield TextLeaf
@@ -190,25 +224,27 @@ class GitkAction(Action):
 
     def activate(self, leaf):
         ''''''
-        git_ui(leaf.cwd)
+        git_ui(leaf.abs_path)
 
 
 # Leaf
 
 class GitStatusLeaf(Leaf):
 
-    def __init__(self, obj, cwd=None):
-        self.cwd = cwd
-        self.status = git_status(self.cwd)
-        self.branch = git_current_branch(self.cwd)
-        self.root = str(git_root(self.cwd))
-        self.name = os.path.basename(self.root) + ': ' + self.branch
-        Leaf.__init__(self, {'file': obj}, self.name)
+    def __init__(self, leaf):
+        leaf_dict = file_dict(leaf)
+        self.cwd = leaf_dict['cwd']
+        self.root = leaf_dict['root']
+        self.title = leaf_dict['title']
+        self.is_dir = leaf_dict['is_dir']
+        self.status = leaf_dict['status']
+        self.branch = leaf_dict['branch']
+        self.abs_path = leaf_dict['abs_path']
+        self.description = leaf_dict['description']
+        Leaf.__init__(self, leaf, self.title)
 
     def get_description(self):
-        return _('Git Status: ') + \
-            str(self.status).replace("{u'", "{'").replace(", u'", ", '") + \
-            ': ' + self.cwd
+        return self.description
 
 
 class GitBranchLeaf(Leaf):
@@ -218,9 +254,12 @@ class GitBranchLeaf(Leaf):
             {'path': path, 'name': name, 'remote': remote},
             name)
         self.name = name
-        self.path = path
+        self.abs_path = path
         self.remote = remote
         self.is_remote = bool(remote)
+
+    def canonical_path(self):
+        return self.abs_path
 
     def get_description(self):
         return (self.remote or 'local') + ': ' + self.name
@@ -228,23 +267,49 @@ class GitBranchLeaf(Leaf):
 
 # sources
 
-class BranchSource (Source):
+class BranchSource(Source):
 
-    def __init__(self, obj=None):
+    def __init__(self, obj=None, fil=None):
         Source.__init__(self, _("Branch Source"))
-        self.cwd = obj.cwd if obj else None
+        self.fil = fil or (lambda x: (y for y in x))
+        self.abs_path = obj.abs_path if obj else None
 
     def get_items(self):
-        branches = fil_remove_link(git_branchs(self.cwd))
+        fil = self.fil
+        branches = fil(fil_remove_link(git_branchs(self.abs_path)))
         for branch in branches:
             if 'remotes/' in branch:
                 splited = branch.split('/')
-                yield GitBranchLeaf(splited[2], self.cwd, splited[1])
+                yield GitBranchLeaf(splited[2], self.abs_path, splited[1])
             else:
-                yield GitBranchLeaf(branch, self.cwd)
+                yield GitBranchLeaf(branch, self.abs_path)
 
     def is_dynamic(self):
         return True
+
+
+# kupfer short-hand
+
+def file_dict(file_obj):
+    real_path = file_obj.canonical_path()
+    result = {}
+
+    result['is_dir'] = file_obj.is_dir
+    result['abs_path'] = real_path
+
+    result['cwd'] = dir_path(real_path)
+
+    result['root'] = str(git_root(real_path))
+    result['status'] = git_status(real_path)
+    result['branch'] = git_current_branch(real_path)
+
+    result['title'] = path.basename(real_path) + ': ' + result['branch']
+
+    result['description'] = _('Git Status: ') + \
+        str(result['status']).replace("{u'", "{'").replace(", u'", ", '") + \
+        ': ' + path.basename(result['root'])
+
+    return result
 
 
 # git short-hands
@@ -259,6 +324,18 @@ def git_status(file_path):
         fil_parse_status(
             fil_clean_output(
                 gen_status(file_path))))
+
+
+def git_has_changes(file_path):
+    try:
+        statuses = fil_remove_status_value(
+            fil_parse_status(
+                fil_clean_output(
+                    gen_status(file_path))), '??')
+        for status in statuses:
+            return True
+    except Exception as e:
+        return False
 
 
 @try_or_show_msg
@@ -287,7 +364,7 @@ def git_remotes(file_path):
 @try_or_show_msg
 def git_ui(file_path):
     '''Show gitk for dir'''
-    gitk(_cwd=file_path)
+    gitk(_cwd=dir_path(file_path))
 
 
 @try_or_show_msg
@@ -299,7 +376,13 @@ def git_ch_branch(file_path, branch, remote=None, create=True):
     if remote:
         branch = remote + '/' + branch
     args.append(branch)
-    git.checkout(*args, _cwd=file_path)
+    git.checkout(*args, _cwd=dir_path(file_path))
+
+
+def git_fetch(remote, branch, file_path):
+    '''Fetch for remote changes'''
+    p = git.fetch(remote, branch, _cwd=dir_path(file_path), _tty_out=False)
+    p.wait()
 
 
 @try_or_show_msg
@@ -308,16 +391,18 @@ def git_commit(file_path, message, recursive=True):
     args = []
     if recursive:
         args.append('-a')
+        file_path = dir_path(file_path)
     args.append('-m')
-    args.append(message)
-    git.checkout(*args, _cwd=file_path)
+    args.append('"' + message + '"')
+    args.append(file_path)
+    git.commit(*args, _cwd=dir_path(file_path))
 
 
 @try_or_show_msg
 def git_root(file_path):
     '''Return git root dir name'''
     rev_parse = git.bake('rev-parse')
-    roots = rev_parse('--show-toplevel', _cwd=file_path)
+    roots = rev_parse('--show-toplevel', _cwd=dir_path(file_path))
     return fil_clean_output(roots).next()
 
 
@@ -325,9 +410,9 @@ def git_is_repo_dir(file_path):
     '''Return git root dir name'''
     rev_parse = git.bake('rev-parse')
     try:
-        roots = rev_parse('--show-toplevel', _cwd=file_path)
+        roots = rev_parse('--show-toplevel', _cwd=dir_path(file_path))
         return bool(fil_clean_output(roots).next())
-    except:
+    except Exception as e:
         return False
 
 
@@ -356,21 +441,21 @@ def current_branch(branchs):
 @generator
 def gen_remotes(file_path):
     '''return generetor of remotes'''
-    remotes = git.remote(_cwd=file_path)
+    remotes = git.remote(_cwd=dir_path(file_path))
     return remotes
 
 
 @generator
 def gen_branchs(file_path):
     '''return generator with branchs'''
-    branches = git.branch('--all', '--color=never', _cwd=file_path)
+    branches = git.branch('--all', '--color=never', _cwd=dir_path(file_path))
     return branches
 
 
 @generator
 def gen_status(file_path):
     '''return generator with result of git status --porcelain'''
-    all_status = git.status('--porcelain', _cwd=file_path)
+    all_status = git.status('--porcelain', file_path, _cwd=dir_path(file_path))
     return all_status
 
 
@@ -398,6 +483,20 @@ def fil_parse_status(all_status):
         yield {'value': value, 'path': path}
 
 
+def fil_remove_status_value(all_status, value):
+    '''filter parsed status by status[value]'''
+    for status in all_status:
+        if status['value'] != value:
+            yield status
+
+
+def fil_remove_parent(branchs):
+    '''Remove status with .. from list'''
+    for branch in branchs:
+        if not '..' in branch:
+            yield branch
+
+
 def fil_clean_branch(branchs):
     '''Remove * from current branch'''
     for branch in branchs:
@@ -414,7 +513,7 @@ def fil_remove_remote(branchs):
             yield branch
 
 
-def fil_local_remote(branchs):
+def fil_remove_local(branchs):
     '''Remove branchs withour remote'''
     for branch in branchs:
         if 'remotes/' in branch:
