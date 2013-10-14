@@ -4,9 +4,9 @@ __author__ = "hugosenari <hugosenari@gmail.com>"
 __description__ = _("""
     Git plugin for kupfer
 """)
-__kupfer_actions__ = ('GitActions', 'GitkAction',
-    'ChangeBranchAction', 'CreateBranchAction', 'FetchBranchAction',
-    'CommitAction', 'CommitRecursiveAction')
+__kupfer_actions__ = ('GitActions', 'GitkAction', 'ChangeBranchAction',
+    'CreateBranchAction', 'FetchBranchAction', 'PullBranchAction',
+    'PushBranchAction', 'CommitAction', 'CommitRecursiveAction')
 
 
 from kupfer.objects import Action, Leaf, FileLeaf, Source, \
@@ -111,6 +111,48 @@ class FetchBranchAction(Action):
 
     def activate(self, leaf, rleaf):
         git_fetch(rleaf.remote, rleaf.name, leaf.abs_path)
+
+    def object_types(self):
+        yield GitBranchLeaf
+
+    def object_source(self, for_item=None):
+        return BranchSource(for_item, fil_remove_local)
+
+    def requires_object(self):
+        return True
+
+
+class PullBranchAction(Action):
+
+    def __init__(self):
+        Action.__init__(self, _('Pull'))
+
+    def item_types(self):
+        yield GitStatusLeaf
+
+    def activate(self, leaf, rleaf):
+        git_pull(rleaf.remote, rleaf.name, leaf.abs_path)
+
+    def object_types(self):
+        yield GitBranchLeaf
+
+    def object_source(self, for_item=None):
+        return BranchSource(for_item, fil_remove_local)
+
+    def requires_object(self):
+        return True
+
+
+class PushBranchAction(Action):
+
+    def __init__(self):
+        Action.__init__(self, _('Push'))
+
+    def item_types(self):
+        yield GitStatusLeaf
+
+    def activate(self, leaf, rleaf):
+        git_push(rleaf.remote, rleaf.name, leaf.abs_path)
 
     def object_types(self):
         yield GitBranchLeaf
@@ -379,9 +421,24 @@ def git_ch_branch(file_path, branch, remote=None, create=True):
     git.checkout(*args, _cwd=dir_path(file_path))
 
 
+@try_or_show_msg
 def git_fetch(remote, branch, file_path):
     '''Fetch for remote changes'''
     p = git.fetch(remote, branch, _cwd=dir_path(file_path), _tty_out=False)
+    p.wait()
+
+
+@try_or_show_msg
+def git_pull(remote, branch, file_path):
+    '''Pull remote changes'''
+    p = git.pull(remote, branch, _cwd=dir_path(file_path), _tty_out=False)
+    p.wait()
+
+
+@try_or_show_msg
+def git_push(remote, branch, file_path):
+    '''Push changes to remote'''
+    p = git.push(remote, branch, _cwd=dir_path(file_path), _tty_out=False)
     p.wait()
 
 
