@@ -5,7 +5,8 @@ __description__ = _("""
     Git plugin for kupfer
 """)
 __kupfer_actions__ = ('GitActions', 'GitkAction',
-    'ChangeBranchAction', 'CreateBranchAction')
+    'ChangeBranchAction', 'CreateBranchAction',
+    'CommitAction', 'CommitRecursiveAction')
 
 
 from kupfer.objects import Action, Leaf, FileLeaf, Source, \
@@ -76,7 +77,7 @@ class ChangeBranchAction(Action):
         yield GitStatusLeaf
 
     def activate(self, leaf, rleaf):
-        git_ch_branch(rleaf.name, rleaf.remote, False)
+        git_ch_branch(leaf.cwd, rleaf.name, rleaf.remote, False)
         return GitStatusLeaf(leaf.object['file'], leaf.cwd)
 
     def object_types(self):
@@ -104,7 +105,63 @@ class CreateBranchAction(Action):
         yield GitStatusLeaf
 
     def activate(self, leaf, rleaf):
-        git_ch_branch(rleaf.object, None)
+        git_ch_branch(leaf.cwd, rleaf.object, None)
+        return GitStatusLeaf(leaf.object['file'], leaf.cwd)
+
+    def object_types(self):
+        yield TextLeaf
+
+    def object_source(self, for_item=None):
+        return TextSource()
+
+    def requires_object(self):
+        return True
+
+    def is_factory(self):
+        return True
+
+    def has_result(self):
+        return True
+
+
+class CommitAction(Action):
+
+    def __init__(self):
+        Action.__init__(self, _('Commit'))
+
+    def item_types(self):
+        yield GitStatusLeaf
+
+    def activate(self, leaf, rleaf):
+        git_commit(leaf.cwd, rleaf.object, False)
+        return GitStatusLeaf(leaf.object['file'], leaf.cwd)
+
+    def object_types(self):
+        yield TextLeaf
+
+    def object_source(self, for_item=None):
+        return TextSource()
+
+    def requires_object(self):
+        return True
+
+    def is_factory(self):
+        return True
+
+    def has_result(self):
+        return True
+
+
+class CommitRecursiveAction(Action):
+
+    def __init__(self):
+        Action.__init__(self, _('Commit All In Dir'))
+
+    def item_types(self):
+        yield GitStatusLeaf
+
+    def activate(self, leaf, rleaf):
+        git_commit(leaf.cwd, rleaf.object)
         return GitStatusLeaf(leaf.object['file'], leaf.cwd)
 
     def object_types(self):
@@ -234,7 +291,7 @@ def git_ui(file_path):
 
 
 @try_or_show_msg
-def git_ch_branch(branch, remote=None, create=True):
+def git_ch_branch(file_path, branch, remote=None, create=True):
     '''Change current branch'''
     args = []
     if create:
@@ -242,7 +299,18 @@ def git_ch_branch(branch, remote=None, create=True):
     if remote:
         branch = remote + '/' + branch
     args.append(branch)
-    git.checkout(*args)
+    git.checkout(*args, _cwd=file_path)
+
+
+@try_or_show_msg
+def git_commit(file_path, message, recursive=True):
+    '''Change current branch'''
+    args = []
+    if recursive:
+        args.append('-a')
+    args.append('-m')
+    args.append(message)
+    git.checkout(*args, _cwd=file_path)
 
 
 @try_or_show_msg
