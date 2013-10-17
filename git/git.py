@@ -19,7 +19,7 @@ from os import path
 # utils function
 
 def show_msg(msg, title='info'):
-    uiutils.show_notification(title, msg)
+    uiutils.show_notification(_(title), _(msg))
 
 
 def try_or_show_msg(fn):
@@ -28,7 +28,7 @@ def try_or_show_msg(fn):
         try:
             return fn(*args, **kwds)
         except ErrorReturnCode as e:
-            show_msg(e.stderr or e, _('Error'))
+            show_msg(e.stderr or e, 'Error')
     return wrapper
 
 
@@ -63,8 +63,8 @@ class GitActions(Action):
         yield BranchSource
 
     def valid_for_item(self, leaf):
-        cwd = leaf.canonical_path()
-        return git_is_repo_dir(cwd)
+        abs_path = leaf.canonical_path()
+        return git_is_repo_dir(abs_path)
 
     def is_factory(self):
         return True
@@ -173,7 +173,7 @@ class CreateBranchAction(Action):
         yield GitStatusLeaf
 
     def activate(self, leaf, rleaf):
-        git_ch_branch(leaf.cwd, rleaf.object, None)
+        git_ch_branch(leaf.abs_path, rleaf.object, None)
         return GitStatusLeaf(leaf.object)
 
     def object_types(self):
@@ -274,11 +274,10 @@ class GitkAction(Action):
 class GitStatusLeaf(Leaf):
 
     def __init__(self, leaf):
-        leaf_dict = file_dict(leaf)
-        self.cwd = leaf_dict['cwd']
+        real_path = leaf.canonical_path()
+        leaf_dict = file_dict(real_path)
         self.root = leaf_dict['root']
         self.title = leaf_dict['title']
-        self.is_dir = leaf_dict['is_dir']
         self.status = leaf_dict['status']
         self.branch = leaf_dict['branch']
         self.abs_path = leaf_dict['abs_path']
@@ -332,14 +331,9 @@ class BranchSource(Source):
 
 # kupfer short-hand
 
-def file_dict(file_obj):
-    real_path = file_obj.canonical_path()
+def file_dict(real_path):
     result = {}
-
-    result['is_dir'] = file_obj.is_dir
     result['abs_path'] = real_path
-
-    result['cwd'] = dir_path(real_path)
 
     result['root'] = str(git_root(real_path))
     result['status'] = git_status(real_path)
@@ -419,6 +413,7 @@ def git_ch_branch(file_path, branch, remote=None, create=True):
         branch = remote + '/' + branch
     args.append(branch)
     git.checkout(*args, _cwd=dir_path(file_path))
+    show_msg('Now at ' + branch, 'Info')
 
 
 @try_or_show_msg
@@ -426,6 +421,7 @@ def git_fetch(remote, branch, file_path):
     '''Fetch for remote changes'''
     p = git.fetch(remote, branch, _cwd=dir_path(file_path), _tty_out=False)
     p.wait()
+    show_msg('Repo updated', 'Info')
 
 
 @try_or_show_msg
@@ -433,6 +429,7 @@ def git_pull(remote, branch, file_path):
     '''Pull remote changes'''
     p = git.pull(remote, branch, _cwd=dir_path(file_path), _tty_out=False)
     p.wait()
+    show_msg('Pull Done', 'Info')
 
 
 @try_or_show_msg
@@ -440,6 +437,7 @@ def git_push(remote, branch, file_path):
     '''Push changes to remote'''
     p = git.push(remote, branch, _cwd=dir_path(file_path), _tty_out=False)
     p.wait()
+    show_msg('Push Done', 'Info')
 
 
 @try_or_show_msg
@@ -453,6 +451,7 @@ def git_commit(file_path, message, recursive=True):
     args.append('"' + message + '"')
     args.append(file_path)
     git.commit(*args, _cwd=dir_path(file_path))
+    show_msg('Commit Done', 'Info')
 
 
 @try_or_show_msg
