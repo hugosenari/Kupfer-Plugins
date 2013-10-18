@@ -150,7 +150,7 @@ class PushBranchAction(GitActionMixin, BranchActionMixin, Action):
         git_push(rleaf.remote, rleaf.name, leaf.abs_path)
 
 
-class CreateBranchAction(GitActionMixin, BranchActionMixin, Action):
+class CreateBranchAction(GitActionMixin, TextActionMixin, Action):
 
     def __init__(self):
         Action.__init__(self, _('Create Branch'))
@@ -166,12 +166,15 @@ class CommitAction(GitActionMixin, TextActionMixin, Action):
         Action.__init__(self, _('Commit'))
 
     def _activate(self, leaf, rleaf):
+        leaf = GitStatusLeaf(leaf)
         git_commit(leaf.abs_path, rleaf.object, False)
         return GitStatusLeaf(leaf)
 
     def valid_for_item(self, leaf):
-        leaf = GitStatusLeaf(leaf)
-        result = git_has_changes(leaf.abs_path)
+        result = GitActionMixin.valid_for_item(self, leaf)
+        if result:
+            leaf = GitStatusLeaf(leaf)
+            result = git_has_changes(leaf.abs_path)
         return result
 
 
@@ -185,8 +188,10 @@ class CommitRecursiveAction(GitActionMixin, TextActionMixin, Action):
         return GitStatusLeaf(leaf)
 
     def valid_for_item(self, leaf):
-        leaf = GitStatusLeaf(leaf)
-        result = git_has_changes(dir_path(leaf.abs_path))
+        result = GitActionMixin.valid_for_item(self, leaf)
+        if result:
+            leaf = GitStatusLeaf(leaf)
+            result = git_has_changes(dir_path(leaf.abs_path))
         return result
 
 
