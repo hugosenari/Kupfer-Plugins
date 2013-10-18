@@ -1,9 +1,7 @@
-__kupfer_name__ = _("Git")
+__kupfer_name__ = "Git"
 __version__ = "0.1"
 __author__ = "hugosenari <hugosenari@gmail.com>"
-__description__ = _("""
-    Git plugin for kupfer
-""")
+__description__ = """Git plugin for kupfer"""
 __kupfer_actions__ = ('GitActions', 'GitkAction', 'ChangeBranchAction',
     'CreateBranchAction', 'FetchBranchAction', 'PullBranchAction',
     'PushBranchAction', 'CommitAction', 'CommitRecursiveAction')
@@ -18,7 +16,10 @@ from os import path
 
 # utils function
 
-def show_msg(msg, title='info'):
+_ = lambda x: x
+
+
+def show_msg(msg, title='Info'):
     uiutils.show_notification(_(title), _(msg))
 
 
@@ -48,225 +49,156 @@ def dir_path(file_path):
     return result
 
 
-# actions
-
-class GitActions(Action):
-
-    def __init__(self):
-        Action.__init__(self, _("Git Actions"))
-
-    def activate(self, leaf):
-        return GitStatusLeaf(leaf)
-
-    def item_types(self):
-        yield FileLeaf
-        yield BranchSource
+class GitActionMixin(object):
 
     def valid_for_item(self, leaf):
         abs_path = leaf.canonical_path()
         return git_is_repo_dir(abs_path)
 
+    def item_types(self):
+        yield FileLeaf
+        yield GitStatusLeaf
+        yield BranchSource
+
     def is_factory(self):
         return True
 
     def has_result(self):
         return True
 
+    def activate(self, leaf, *args):
+        git_status = GitStatusLeaf(leaf)
+        return self._activate(git_status, *args)
 
-class ChangeBranchAction(Action):
+
+class BranchActionMixin(object):
+
+    def object_types(self):
+        yield GitBranchLeaf
+
+    def object_source(self, for_item=None):
+        git_status = GitStatusLeaf(for_item)
+        return BranchSource(git_status, self.branch_filter)
+
+    def requires_object(self):
+        return True
+
+
+class TextActionMixin(object):
+
+    def object_types(self):
+        yield TextLeaf
+
+    def object_source(self, for_item=None):
+        return TextSource()
+
+    def requires_object(self):
+        return True
+
+
+# actions
+
+class GitActions(GitActionMixin, Action):
 
     def __init__(self):
+        Action.__init__(self, _("Git Actions"))
+
+    def _activate(self, leaf):
+        return leaf
+
+
+class ChangeBranchAction(GitActionMixin, BranchActionMixin, Action):
+
+    def __init__(self):
+        self.branch_filter = None
         Action.__init__(self, _('Change Branch'))
 
-    def item_types(self):
-        yield GitStatusLeaf
-
-    def activate(self, leaf, rleaf):
+    def _activate(self, leaf, rleaf):
         git_ch_branch(leaf.abs_path, rleaf.name, rleaf.remote, False)
-        return GitStatusLeaf(leaf.object)
-
-    def object_types(self):
-        yield GitBranchLeaf
-
-    def object_source(self, for_item=None):
-        return BranchSource(for_item)
-
-    def requires_object(self):
-        return True
-
-    def is_factory(self):
-        return True
-
-    def has_result(self):
-        return True
+        return GitStatusLeaf(leaf)
 
 
-class FetchBranchAction(Action):
+class FetchBranchAction(GitActionMixin, BranchActionMixin, Action):
 
     def __init__(self):
+        self.branch_filter = fil_remove_local
         Action.__init__(self, _('Fetch'))
 
-    def item_types(self):
-        yield GitStatusLeaf
-
-    def activate(self, leaf, rleaf):
+    def _activate(self, leaf, rleaf):
         git_fetch(rleaf.remote, rleaf.name, leaf.abs_path)
-
-    def object_types(self):
-        yield GitBranchLeaf
-
-    def object_source(self, for_item=None):
-        return BranchSource(for_item, fil_remove_local)
-
-    def requires_object(self):
-        return True
+        return GitStatusLeaf(leaf)
 
 
-class PullBranchAction(Action):
+class PullBranchAction(GitActionMixin, BranchActionMixin, Action):
 
     def __init__(self):
+        self.branch_filter = fil_remove_local
         Action.__init__(self, _('Pull'))
 
-    def item_types(self):
-        yield GitStatusLeaf
-
-    def activate(self, leaf, rleaf):
+    def _activate(self, leaf, rleaf):
         git_pull(rleaf.remote, rleaf.name, leaf.abs_path)
-
-    def object_types(self):
-        yield GitBranchLeaf
-
-    def object_source(self, for_item=None):
-        return BranchSource(for_item, fil_remove_local)
-
-    def requires_object(self):
-        return True
+        return GitStatusLeaf(leaf)
 
 
-class PushBranchAction(Action):
+class PushBranchAction(GitActionMixin, BranchActionMixin, Action):
 
     def __init__(self):
+        self.branch_filter = fil_remove_local
         Action.__init__(self, _('Push'))
-
-    def item_types(self):
-        yield GitStatusLeaf
 
     def activate(self, leaf, rleaf):
         git_push(rleaf.remote, rleaf.name, leaf.abs_path)
 
-    def object_types(self):
-        yield GitBranchLeaf
 
-    def object_source(self, for_item=None):
-        return BranchSource(for_item, fil_remove_local)
-
-    def requires_object(self):
-        return True
-
-
-class CreateBranchAction(Action):
+class CreateBranchAction(GitActionMixin, BranchActionMixin, Action):
 
     def __init__(self):
         Action.__init__(self, _('Create Branch'))
 
-    def item_types(self):
-        yield GitStatusLeaf
-
-    def activate(self, leaf, rleaf):
+    def _activate(self, leaf, rleaf):
         git_ch_branch(leaf.abs_path, rleaf.object, None)
-        return GitStatusLeaf(leaf.object)
-
-    def object_types(self):
-        yield TextLeaf
-
-    def object_source(self, for_item=None):
-        return TextSource()
-
-    def requires_object(self):
-        return True
-
-    def is_factory(self):
-        return True
-
-    def has_result(self):
-        return True
+        return GitStatusLeaf(leaf)
 
 
-class CommitAction(Action):
+class CommitAction(GitActionMixin, TextActionMixin, Action):
 
     def __init__(self):
         Action.__init__(self, _('Commit'))
 
-    def item_types(self):
-        yield GitStatusLeaf
-
-    def activate(self, leaf, rleaf):
+    def _activate(self, leaf, rleaf):
         git_commit(leaf.abs_path, rleaf.object, False)
-        return GitStatusLeaf(leaf.object)
+        return GitStatusLeaf(leaf)
 
     def valid_for_item(self, leaf):
+        leaf = GitStatusLeaf(leaf)
         result = git_has_changes(leaf.abs_path)
         return result
 
-    def object_types(self):
-        yield TextLeaf
 
-    def object_source(self, for_item=None):
-        return TextSource()
-
-    def requires_object(self):
-        return True
-
-    def is_factory(self):
-        return True
-
-    def has_result(self):
-        return True
-
-
-class CommitRecursiveAction(Action):
+class CommitRecursiveAction(GitActionMixin, TextActionMixin, Action):
 
     def __init__(self):
         Action.__init__(self, _('Commit All In Dir'))
 
-    def item_types(self):
-        yield GitStatusLeaf
-
-    def activate(self, leaf, rleaf):
-        git_commit(self.abs_path, rleaf.object, leaf.file_name)
-        return GitStatusLeaf(leaf.object)
+    def _activate(self, leaf, rleaf):
+        git_commit(leaf.abs_path, rleaf.object, leaf.file_name)
+        return GitStatusLeaf(leaf)
 
     def valid_for_item(self, leaf):
+        leaf = GitStatusLeaf(leaf)
         result = git_has_changes(dir_path(leaf.abs_path))
         return result
 
-    def object_types(self):
-        yield TextLeaf
 
-    def object_source(self, for_item=None):
-        return TextSource()
-
-    def requires_object(self):
-        return True
-
-    def is_factory(self):
-        return True
-
-    def has_result(self):
-        return True
-
-
-class GitkAction(Action):
+class GitkAction(GitActionMixin, Action):
 
     def __init__(self):
         Action.__init__(self, _("Gitk"))
 
-    def item_types(self):
-        yield GitStatusLeaf
-
-    def activate(self, leaf):
+    def _activate(self, leaf):
         ''''''
         git_ui(leaf.abs_path)
+        return GitStatusLeaf(leaf)
 
 
 # Leaf
@@ -282,10 +214,13 @@ class GitStatusLeaf(Leaf):
         self.branch = leaf_dict['branch']
         self.abs_path = leaf_dict['abs_path']
         self.description = leaf_dict['description']
-        Leaf.__init__(self, leaf, self.title)
+        Leaf.__init__(self, leaf.object, self.title)
 
     def get_description(self):
         return self.description
+
+    def canonical_path(self):
+        return self.abs_path
 
 
 class GitBranchLeaf(Leaf):
