@@ -1,11 +1,5 @@
-'''
-Created on Nov 6, 2011
-
-@author: hugosenari
-'''
-
 __kupfer_name__ = _("mpris2-plugin")
-__kupfer_sources__ = ('Mpris2Source',)
+__kupfer_sources__ = ('Mpris2Source', 'PlayersSource')
 __kupfer_actions__ = ('PlayPauseAction',
                       'NextAction',
                       'PreviousAction',
@@ -15,21 +9,17 @@ __kupfer_actions__ = ('PlayPauseAction',
                       'InfoAction',
                       'PlayerOpenUriAction',)
 __description__ = _("Control any mpris2 media player\n\n Default player changes to last media player you use.")
-__version__ = "0.1"
+__version__ = "0.2"
 __author__ = "Hugo Ribeiro"
 
-from kupfer import utils, pretty
+from kupfer import pretty
 from kupfer.plugin_support import PluginSettings
-from kupfer.obj.apps import AppLeafContentMixin
-from kupfer.obj.grouping import ToplevelGroupingSource
 from kupfer.obj.compose import ComposedLeaf
-from kupfer.objects import Leaf, Source, Action, RunnableLeaf, SourceLeaf, AppLeaf
+from kupfer.objects import Leaf, Source, Action, AppLeaf
 
-from mpris2.utils import get_players_uri, get_players_id, get_player_id_from_uri, SomePlayers
-from mpris2 import MediaPlayer2, Player, Playlists
-from mpris2.types import Loop_Status, Metadata_Map, Playlist_Ordering
-
-import re
+from mpris2.utils import get_players_uri, SomePlayers
+from mpris2 import MediaPlayer2, Player
+from mpris2.types import Loop_Status, Metadata_Map
 
 __kupfer_settings__ = PluginSettings( 
     {
@@ -40,7 +30,6 @@ __kupfer_settings__ = PluginSettings(
         "alternatives": SomePlayers.get_dict().values()
     }
 )
-#[player_name.split('.')[-1] for player_name in get_players_uri()]
 
 PLUGIN_PLAYERS = {
 #    'appid' : 'mprisid'
@@ -55,6 +44,12 @@ class MediaPlayerLeaf(Leaf):
     def __init__(self, obj, name, mpris_uri):
         super(MediaPlayerLeaf, self).__init__(obj, name)
         self.mpris_uri = mpris_uri
+
+    def get_icon_name(self):
+        return "multimedia-player"
+    
+    def get_description(self):
+        return _(self.mpris_uri)
 
 
 class MediaLeaf(MediaPlayerLeaf):
@@ -81,16 +76,32 @@ class MediaLeaf(MediaPlayerLeaf):
 
     def get_icon_name(self):
         return "audio-x-generic"
-
-
 ##/LEAF
 
 
 ##SOURCE
 
+class PlayersSource(Source):
+    def __init__(self):
+        super(PlayersSource, self).__init__("MPRIS2 Players")
+        
+    def get_items(self):
+        for mpris_uri in get_players_uri('.+'):
+            yield MediaPlayerLeaf(mpris_uri, mpris_uri.split('.')[-1], mpris_uri)
+
+    def provides(self):
+        yield MediaPlayerLeaf
+        
+    def get_description(self):
+        return _("List all available players")
+
+    def get_icon_name(self):
+        return "multimedia-player"
+
+
 class Mpris2Source (Source):
     instance = None
-    #appleaf_content_id = __kupfer_settings__["default_mpris2_player"]
+
     def __init__(self):
         super(Mpris2Source, self).__init__("Media Players History")
 
@@ -116,7 +127,6 @@ class Mpris2Source (Source):
 
     def initialize(self):
         Mpris2Source.instance = self
-        #Mpris2Source.appleaf_content_id = __kupfer_settings__["default_mpris2_player"]
         self.actions_available = {}
         self.appleaf_instance = None
         self.mark_for_update()
@@ -162,6 +172,9 @@ class MediaPlayerAction(Action):
         super(MediaPlayerAction, self).__init__(name)
     
     def valid_for_item(self, leaf, *args, **kw):
+        if hasattr(leaf, 'mpris_uri'):
+            return self.valid_for_uri(leaf.mpris_uri,  *args, **kw)
+        
         for player_uri in get_players_uri(".+" + leaf.repr_key()):
             Mpris2Source.add_action(self)
             return self.valid_for_uri(player_uri,  *args, **kw)
@@ -169,6 +182,7 @@ class MediaPlayerAction(Action):
         
     def item_types(self):
         yield AppLeaf
+        yield MediaPlayerLeaf
     
     def activate(self, leaf):
         Mpris2Source.set_appleaf_instance(leaf)
