@@ -1,5 +1,5 @@
 __kupfer_name__ = _("mpris2-plugin")
-__kupfer_sources__ = ('Mpris2Source', 'PlayersSource')
+__kupfer_sources__ = ('Mpris2Source',) # 'PlayersSource')
 __kupfer_actions__ = ('PlayPauseAction',
                       'NextAction',
                       'PreviousAction',
