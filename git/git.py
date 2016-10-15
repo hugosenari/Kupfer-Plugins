@@ -1,5 +1,5 @@
 __kupfer_name__ = "Git"
-__version__ = "0.1"
+__version__ = "0.1.0"
 __author__ = "hugosenari <hugosenari@gmail.com>"
 __description__ = """Git plugin for kupfer"""
 __kupfer_actions__ = ('GitActions', 'GitkAction', 'ChangeBranchAction',
