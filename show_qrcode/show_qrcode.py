@@ -7,7 +7,7 @@ __kupfer_actions__ = (
             "ShowQRCode",
     )
 __description__ = _("Display text as QRCode in a window")
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 __author__ = "Thomas Renard <cybaer42@web.de>"
 
 import StringIO
