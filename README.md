@@ -59,4 +59,4 @@ Feel free to issue your suggestion for TODO
 Instalation:
 ------------
 
-pip install kupfer_{plugin_name}.
+pip install kupfer_plugin_(name}
