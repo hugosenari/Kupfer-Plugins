@@ -30,7 +30,8 @@ Require Kupfer_
 Features
 --------
 
-* TODO
+* Show Text, IMContact, Email, Phone, mecard or image as QRCode
+
 
 Install
 -------
