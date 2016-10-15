@@ -20,8 +20,7 @@ Show QRCode
 
 Show text as QRCode
 
-Require Kupfer_
-.. _Kupfer: http://engla.github.io/kupfer/
+Require Kupfer http://engla.github.io/kupfer/
 
 
 * Free software: MIT license
