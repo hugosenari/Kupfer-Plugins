@@ -3,7 +3,7 @@
 # http://engla.github.io/kupfer/Documentation/PluginAPI.html
 
 __kupfer_name__ = _("PLUGIN_NAME")
-__version__ = "0.1"
+__version__ = "0.2"
 __author__ = "YOUR_NAME <YOUR@EMAIL>"
 __description__ = _("""
     PLUGIN_DESCRIPTION
@@ -79,7 +79,7 @@ __description__ = _("""
 
 
 #PLUGIN_SOURCES
-from kupfer.objects import Source
+#from kupfer.objects import Source
 #source are leaf factory
 #here is where kupfer will create your leafs
 #ie: TextsSource, FilesSource, ContactsSource, ApplicationsSource...
