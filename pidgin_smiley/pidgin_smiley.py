@@ -2,7 +2,7 @@ __kupfer_name__ = _("Smiley")
 __kupfer_sources__ = ("SmileySource",)
 __kupfer_actions__ = ()
 __description__ = _("""List and copy char of pidgin smiley theme""")
-__version__ = "0.1.0"
+__version__ = "__version__ = '0.2.0'"
 __author__ = "Hugo Sena Ribeiro <hugosenari gmail com>"
 
 from os import path
