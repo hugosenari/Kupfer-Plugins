@@ -2,7 +2,7 @@ __kupfer_name__ = _("Restart Apps")
 __kupfer_sources__ = ()
 __kupfer_actions__ = ("RestartApp", )
 __description__ = _("""Restart applications.""")
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __author__ = "Hugo Sena Ribeiro <hugosenari gmail com>"
 
 from kupfer import utils, launch, pretty
