@@ -358,8 +358,8 @@ class InfoAction(MediaPlayerAction):
         super(InfoAction, self).activate(leaf)
         player = self.valid_for_item(leaf, Player)
         if player:
-            player_uri = get_players_uri(".+" + leaf.repr_key())[0]
-            return MediaLeafSource(player, player_uri)
+            for player_uri in get_players_uri(".+" + leaf.repr_key()):
+                return MediaLeafSource(player, player_uri)
         
     def valid_for_uri(self, player_uri, make=Player):
         player = make(dbus_interface_info={'dbus_uri': player_uri})

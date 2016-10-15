@@ -27,7 +27,8 @@ Require MPRIS2 https://github.com/hugosenari/mpris2/
 Features
 --------
 
-* TODO
+* Basic commands Play, Pause, Next, Previous
+*  
 
 Install
 -------
