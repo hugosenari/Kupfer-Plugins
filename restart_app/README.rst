@@ -11,7 +11,7 @@ Add action to restart Application that are running
 Install
 -------
 
-pip install kupfer_plugin_Restart App
+pip install kupfer_plugin_restart_app
 
 
 Credits
