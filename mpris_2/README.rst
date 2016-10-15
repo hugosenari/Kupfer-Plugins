@@ -18,6 +18,7 @@ MPRIS2
 Control any mpris2 media player
 
 Require Kupfer https://engla.github.io/kupfer/
+
 Require MPRIS2 https://github.com/hugosenari/mpris2/
 
 
@@ -28,7 +29,7 @@ Features
 --------
 
 * Basic commands Play, Pause, Next, Previous
-*  
+ 
 
 Install
 -------
