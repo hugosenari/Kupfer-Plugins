@@ -49,6 +49,6 @@ setup(
     cmdclass={'install': CopyPlugin},
     py_modules=[plugin_module],
     zip_safe=False,
-    version='0.2.3',
+    version='0.2.4',
     **dict(convert(read_cfg()))
 )
