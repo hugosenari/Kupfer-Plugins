@@ -64,3 +64,14 @@ Instalation:
 ------------
 
 pip install kupfer_plugin_(name}
+
+
+See also:
+---------
+
+* [inirudebwoy/Pass](https://github.com/inirudebwoy/kupfer/blob/master/kupfer/plugin/pass.py)
+* [mank319/Kupfer-Plugins](https://github.com/mank319/Kupfer-Plugins)
+* [stebalien/Kupfer-Plugins](http://stebalien.com/blog/kupfer-plugins/)
+* [Kupfer/Tips](https://wiki.gnome.org/Apps/Kupfer/Tips)
+* [Crunchbang/Theme](http://crunchbang.org/forums/viewtopic.php?id=27501)
+* [labero/mate](https://github.com/labero/kupfer/blob/MATE-desktop/kupfer/plugin/session_mate.py)
