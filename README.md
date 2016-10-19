@@ -56,6 +56,8 @@ TODO:
  * Upload file to Dropbox
 * GDrive
  * Upload file to Google Drive
+* [ZZ](https://github.com/funcoeszz/funcoeszz)
+  * Copy useful function ZZ
 
 Feel free to issue your suggestion for TODO
 
