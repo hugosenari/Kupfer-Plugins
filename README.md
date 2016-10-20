@@ -56,6 +56,8 @@ TODO:
  * Upload file to Dropbox
 * GDrive
  * Upload file to Google Drive
+* Plugins MKT
+ * Similar to Eclipse Marketplace for kupfer plugins
 * [ZZ](https://github.com/funcoeszz/funcoeszz)
   * Copy useful function ZZ
 
