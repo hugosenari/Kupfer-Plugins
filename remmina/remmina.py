@@ -4,7 +4,7 @@ __description__ = _("""Start remmina sessions""")
 __kupfer_actions__ = (u"RemminaConnect",)
 __kupfer_name__ = _(u"Remmina")
 __kupfer_sources__ = (u"ReminaHostServiceSource",)
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 from kupfer import pretty, utils
 from kupfer.obj.apps import AppLeafContentMixin
