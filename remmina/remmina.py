@@ -17,14 +17,16 @@ import fnmatch
 import os
 import re
 
-default_cfg_dir = os.path.join(
-    os.getenv('USERPROFILE') or os.getenv('HOME'),
-    '.local', 'share', 'remmina')
+home_dir = os.getenv('USERPROFILE') or os.getenv('HOME')
+
+default_cfg_dir1 = os.path.join(home_dir, '.remmina')
+default_cfg_dir2 = os.path.join(home_dir, '.local', 'share', 'remmina')
+default_cfg_dir = ':'.join([default_cfg_dir1, default_cfg_dir2])
 
 __kupfer_settings__ = PluginSettings( 
         {
                 "key" : "remmina_hosts_folder",
-                "label": _("Remina config folder"),
+                "label": _("Remina config folders"),
                 "type": str,
                 "value": default_cfg_dir,
         }
@@ -32,15 +34,14 @@ __kupfer_settings__ = PluginSettings(
 
 class ReminnaHostServiceLeaf(HostServiceLeaf):
     def __init__(self, item):
-        HostServiceLeaf.__init__(
-             self, item.get('name'),
+        HostServiceLeaf.__init__(self,
+             item.get('name'),
              item.get('server') or item.get('ssh_server'),
              item.get('protocol'),
              item.get('description'),
              item.get('port'),
              item.get('username') or item.get('ssh_username'),
-             item.get('password') or item.get('ssh_password'),
-             item)
+             item.get('password') or item.get('ssh_password'))
 
     def get_icon_name(self):
         return "network-server"
@@ -69,16 +70,21 @@ class ReminaHostServiceSource(AppLeafContentMixin,
         return "remmina"
 
     def get_items(self):
-        cfg_dir = __kupfer_settings__["remmina_hosts_folder"]
-        cfg_files = os.listdir(cfg_dir)
-        for cfg_file in cfg_files:
-            uri = os.path.join(cfg_dir, cfg_file)
-            if fnmatch.fnmatch(cfg_file, '*.remmina'):
-                yield self.parse_file(uri)
-
-    def parse_file(self, uri):
-        return ReminnaHostServiceLeaf(
-            ReminaHostServiceSource._parse_file(uri))
+        files = ReminaHostServiceSource.list_files() or []
+        for host_file in files:
+            item = ReminaHostServiceSource._parse_file(host_file)
+            yield ReminnaHostServiceLeaf(item)
+    
+    @staticmethod
+    def list_files():
+        cfg_dirs = __kupfer_settings__["remmina_hosts_folder"]
+        for cfg_dir in cfg_dirs.split(':'):
+            cfg_files = []
+            if os.path.exists(cfg_dir):
+                cfg_files = os.listdir(cfg_dir)
+            for cfg_file in cfg_files:
+                if fnmatch.fnmatch(cfg_file, '*.remmina'):
+                    yield os.path.join(cfg_dir, cfg_file)
 
     @staticmethod
     def _parse_file(uri):
@@ -92,7 +98,7 @@ class ReminaHostServiceSource(AppLeafContentMixin,
                     result[key] = value.strip()
 
         result['description'] = "%s : %s : %s : %s" % (
-            result.get('group'),
+            result.get('group', 'no group'),
             result.get('server') or result.get('ssh_server'),
             result.get('protocol'),
             result.get('name'))
