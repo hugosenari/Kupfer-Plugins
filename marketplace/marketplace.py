@@ -5,115 +5,81 @@
 __kupfer_name__ = _("Marketplace")
 __version__ = "0.1.0"
 __author__ = "Hugo Sena Ribeiro <hugosenari@gmail.com>"
-__description__ = _("""
-    Search and install 3th party plugins for kupfer
-""")
-
-#optional:
-# should be tuples of names of classes in the plugin
-#__kupfer_sources__ = ("YourPluginSource",)
-#__kupfer_actions__ = ("PluginActionName",)
-#other options:
-#__kupfer_text_sources__ = ("PLUGIN_TEXT_SOURCES",)
-#__kupfer_action_generators__ = ("PLUGIN_ACTION_GENERATORS",)
-#__kupfer_contents__ = ("PLUGIN_CONTENTS",)
-
-#if your plugin needs user settings
-#from kupfer.plugin_support import PluginSettings
-#__kupfer_settings__ = PluginSettings( 
-#    {
-#        "key" : "marketplace_KEY",
-#        "label": _("SETTING_LABEL"),
-#        "type": str,
-#        "value": "SETTING_DEFAULT_VALUE",
-#    }, 
-#    {
-#        "key" : "marketplaceOTHER_KEY",
-#        "label": _("OTHER_SETTING_LABEL"),
-#        "type": int,
-#        "value": "OTHER_SETTING_DEFAULT_VALUE",
-#        "alternatives": OTHER_SETTING_LIST_OF_ALTERNATIVES
-#    },
-#)
-#then you can get setting:
-#__kupfer_settings__["marketplace_KEY"]
+__description__ = _("""Search and install 3th party plugins for kupfer""")
+__kupfer_sources__ = ("MarketplaceSource",)
+__kupfer_actions__ = ("InstallPlugin",)
+from kupfer.plugin_support import PluginSettings
+__kupfer_settings__ = PluginSettings( 
+    {
+        "key" : "marketplace_keywords",
+        "label": _("pypi search keywords"),
+        "type": str,
+        "value": "kupfer",
+    },
+    {
+        "key" : "marketplace_index",
+        "label": _("pypi index"),
+        "type": str,
+        "value": "https://pypi.python.org/pypi",
+    }
+)
 
 
-#PLUGINS LEAFS
-#leafs are plugin objects
-#ie: TextLeaf, FileLeaf, ContactLeaf, EmailLeaf, FolderLeaf, ApplicationLeaf...
-#from kupfer.objects import Leaf
-#class YourPluginLeaf(Leaf):
-#    #required
-#    #init your leaf object
-#    def __init__(self, obj):
-#        ''' '''
-#        super(self.__class__, self).__init__(obj, _("Plugin Leaf Name"))
-#        #do something else with object
-#        #you can get object anywhere in this class using self.object
-#
-#    #optional
-#    #return list of actions that can work with this object
-#    def get_actions(self):
-#        ''' '''
-#        yield Plugin_Action_name
+def namelize(name):
+    name = name or ''
+    name = name.replace('kupfer_plugin_', '')
+    name = name.replace('_', ' ')
+    name = name.capitalize()
+    return name
 
 
-#PLUGIN ACTIONS
-#actions are what your plugin can do with objects
-#ie: OpenFile, Delete, Edit, PlayNext...
-#from kupfer.objects import Action
-#class PluginActionName(action):
-#    #required
-#    #do here something with your object
-#    def activate(self, obj):
-#        ''' '''
-#        #obj in most of case are a leaf
-#        
-#
-#    #optional
-#    #return list of object that can be activated with this
-#    #reverse version of get_actions defined in leaf
-#    def item_types(self):
-#        ''' '''
+from kupfer.objects import Leaf
+class PyPiPluginLeaf(Leaf):
+    def __init__(self, obj):
+        super(self.__class__, self).__init__(
+            obj,
+            namelize(obj.get('name')),
+        )
+        
+    def get_description(self):
+        return self.object.get('summary')
 
 
-#PLUGIN_SOURCES
-#from kupfer.objects import Source
-#source are leaf factory
-#here is where kupfer will create your leafs
-#ie: TextsSource, FilesSource, ContactsSource, ApplicationsSource...
-#from kupfer.objects import Source
-#class YourPluginSource(Source):
-#    #required
-#    #init your source object
-#    def __init__(self):
-#        ''' '''
-#        super(self.__class__, self).__init__(_("Plugin Source Name"))
-#        self.resource = None
-#    
-#    #return the list of leaf
-#    def get_items(self):
-#        ''' '''
-#        #note that you this example don't define MyPluginResource
-#        #beause you doesn't need one, you can create all object inside this class
-#        #than MyPluginResource this is only for ilustration
-#        if self.resource:
-#            for obj in self.resource.get_all():
-#                yield YourPluginLeaf(obj)
-#    
-#    #optional
-#    #start one or more resources that need to be started to get leaf
-#    #ie: connect with one db, open file, ...
-#    def initialize(self):
-#        ''' '''
-#        self.resource = MyPluginResource("")
-#        self.resource.initialize()
-#        
-#    #optional
-#    #stops resources created at "initialize"
-#    def finalize(self):
-#        ''' '''
-#        if self.resource:
-#            self.resource.finalize()
-#            self.resource = None
+from kupfer.objects import Action
+class InstallPlugin(Action):
+    def __init__(self):
+        Action.__init__(self, name=_("Install"))
+    
+    def activate(self, leaf):
+        ''' '''
+        #obj in most of case are a leaf
+
+    def item_types(self):
+        yield PyPiPluginLeaf
+
+    def valid_for_item(self, leaf):
+        return True
+
+
+from kupfer.objects import Source
+class MarketplaceSource(Source):
+    def __init__(self):
+        super(self.__class__, self).__init__(_("Plugin Marketplace"))
+        self.my_resource = None
+    
+    #return the list of leaf
+    def get_items(self):
+        if not self.my_resource is None:
+            keywords = __kupfer_settings__["marketplace_keywords"]
+            for obj in self.my_resource.search(
+                {'keywords': keywords},'or'
+            ):
+                yield PyPiPluginLeaf(obj)
+    
+    def initialize(self):
+        try:
+            import xmlrpclib
+        except ImportError:
+            import xmlrpc.client as xmlrpclib
+        uri = __kupfer_settings__["marketplace_index"]
+        self.my_resource = xmlrpclib.ServerProxy(uri)
