@@ -41,7 +41,9 @@ class ReminnaHostServiceLeaf(HostServiceLeaf):
              item.get('description'),
              item.get('port'),
              item.get('username') or item.get('ssh_username'),
-             item.get('password') or item.get('ssh_password'))
+             item.get('password') or item.get('ssh_password'),
+             item
+        )
 
     def get_icon_name(self):
         return "network-server"
