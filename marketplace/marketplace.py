@@ -66,24 +66,21 @@ class InstallPlugin(Action):
 
 
 from kupfer.objects import Source
+try:
+    import xmlrpclib
+except ImportError:
+    import xmlrpc.client as xmlrpclib
 class MarketplaceSource(Source):
     def __init__(self):
         super(self.__class__, self).__init__(_("Plugin Marketplace"))
-        self.my_resource = None
     
     #return the list of leaf
     def get_items(self):
-        if not self.my_resource is None:
+        uri = __kupfer_settings__["marketplace_index"]
+        my_resource = xmlrpclib.ServerProxy(uri)
+        if not my_resource is None:
             keywords = __kupfer_settings__["marketplace_keywords"]
-            for obj in self.my_resource.search(
+            for obj in my_resource.search(
                 {'keywords': keywords},'or'
             ):
                 yield PyPiPluginLeaf(obj)
-    
-    def initialize(self):
-        try:
-            import xmlrpclib
-        except ImportError:
-            import xmlrpc.client as xmlrpclib
-        uri = __kupfer_settings__["marketplace_index"]
-        self.my_resource = xmlrpclib.ServerProxy(uri)
