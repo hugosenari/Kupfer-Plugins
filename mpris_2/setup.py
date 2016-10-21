@@ -5,6 +5,7 @@ from os import path
 from subprocess import call
 from setuptools import setup
 from setuptools.command.install import install
+from setuptools.command import easy_install
 try:
     from configparser import ConfigParser  # @UnusedImport
 except:
@@ -31,15 +32,7 @@ class CopyPlugin(install):
         call("cp -p {} {}".format(plugin_file, install_path), shell=True)
         
         print("Install dependency")
-        call("pip install --user mpris2", shell=True)
-        try:
-            call("pip3 install --user mpris2", shell=True)
-        except:
-            pass
-        try:
-            call("pip2 install --user mpris2", shell=True)
-        except:
-            pass
+        easy_install.main(['--user', 'mpris2'] )
 
 
 def read_cfg():
