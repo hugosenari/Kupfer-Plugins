@@ -10,6 +10,8 @@ WIP/DONE:
  * Call eclipse common task
 * [GIT](./git):
  * Git commands for kupfer
+* [Plugins Marketplace](./marketplace)
+ * Similar to Eclipse Marketplace for kupfer plugins
 * [MPRI2](./mpris_2):
  * Easy way to control  players that implement mpris2
 * [Pidgin Smileys](./pidgin_smiley):
@@ -56,8 +58,6 @@ TODO:
  * Upload file to Dropbox
 * GDrive
  * Upload file to Google Drive
-* Plugins MKT
- * Similar to Eclipse Marketplace for kupfer plugins
 * [ZZ](https://github.com/funcoeszz/funcoeszz)
   * Copy useful function ZZ
 
