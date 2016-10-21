@@ -10,6 +10,8 @@ Marketplace
 
 Search and install 3th party plugins for kupfer
 
+For your plugin be listed they need to be uploaded to pypi with kupfer keyword.
+
 Require Kupfer http://engla.github.io/kupfer/
 
 
