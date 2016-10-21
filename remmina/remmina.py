@@ -11,7 +11,7 @@ from kupfer.obj.apps import AppLeafContentMixin
 from kupfer.objects import Action
 from kupfer.obj.grouping import ToplevelGroupingSource
 from kupfer.obj.helplib import FilesystemWatchMixin
-from kupfer.obj.hosts import HostLeaf, HostServiceLeaf
+from kupfer.obj.hosts import HostServiceLeaf
 from kupfer.plugin_support import PluginSettings
 import fnmatch
 import os

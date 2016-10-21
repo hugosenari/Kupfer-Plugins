@@ -11,7 +11,7 @@ try:
 except:
     from ConfigParser import ConfigParser  # @UnresolvedImport @Reimport
 
-plugin_module = 'mpris_2'
+plugin_module = 'marketplace'
 plugin_path = path.dirname(path.abspath(__file__))
 
 
@@ -26,13 +26,9 @@ class CopyPlugin(install):
         plugin_file = path.join(plugin_path, plugin_module + '.py')
         print("Copy {} to {}".format(plugin_file, install_path))
         call("cp -p {} {}".format(plugin_file, install_path), shell=True)
-
-        plugin_file = path.join(plugin_path, plugin_module + '_plus.py')
-        print("Copy {} to {}".format(plugin_file, install_path))
-        call("cp -p {} {}".format(plugin_file, install_path), shell=True)
         
         print("Install dependency")
-        easy_install.main(['--user', 'mpris2'] )
+        easy_install.main(['--user', 'pip'] )
 
 
 def read_cfg():
@@ -55,9 +51,8 @@ def convert(cfgs):
 
 setup(
     cmdclass={'install': CopyPlugin},
-    py_modules=[plugin_module, plugin_module + '_plus'],
+    py_modules=[plugin_module],
     zip_safe=False,
     version='0.1.0',
-    install_requires=['mpris2'],
     **dict(convert(read_cfg()))
 )
