@@ -45,14 +45,18 @@ class PyPiPluginLeaf(Leaf):
         return self.object.get('summary')
 
 
+from kupfer import uiutils
 from kupfer.objects import Action
+from pip.commands.install import InstallCommand
 class InstallPlugin(Action):
     def __init__(self):
         Action.__init__(self, name=_("Install"))
     
     def activate(self, leaf):
-        ''' '''
-        #obj in most of case are a leaf
+        InstallCommand().main(['--upgrade', '--user', leaf.object.get("name")] )
+        uiutils.show_notification(_("Plugin Installed"), 
+            "Now enable {} at preferences".format(leaf.name),
+            icon_name=self.get_icon_name())
 
     def item_types(self):
         yield PyPiPluginLeaf
