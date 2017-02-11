@@ -26,7 +26,7 @@ Require Kupfer http://engla.github.io/kupfer/
 Features
 --------
 
-* TODO
+* Search
 
 Install
 -------

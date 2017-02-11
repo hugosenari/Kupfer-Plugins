@@ -155,7 +155,7 @@ class ChangeStatus(Action):
 					connection = bus.get_object(connection_iface, connection_path)
 					simple_presence = dbus.Interface(connection, SIMPLE_PRESENCE_IFACE)
 					simple_presence.SetPresence(iobj.object, _STATUSES.get(iobj.object))
-			except dbus.DBusException, exc:
+			except dbus.DBusException as exc:
 				pretty.print_error(__name__, type(exc).__name__, exc)
 
 	def item_types(self):
@@ -224,7 +224,7 @@ class ContactsSource(AppLeafContentMixin, ToplevelGroupingSource,
 							'valid_account':valid_account}, *args, **kwds),
 					error_handler=lambda *args, **kwds:
 						self._error_handle_channels(*args, **kwds),)
-			except dbus.DBusException, exc:
+			except dbus.DBusException as exc:
 				pretty.print_error(__name__, type(exc).__name__, exc)
 	
 	def _reply_handle_channels(self, opts, channels, *args, **kwds):
@@ -262,9 +262,9 @@ class ContactsSource(AppLeafContentMixin, ToplevelGroupingSource,
 							else:
 								self._contacts.append(empathyContact)
 							
-						except dbus.DBusException, exc:
+						except dbus.DBusException as exc:
 							pretty.print_error(__name__, type(exc).__name__, exc)
-			except dbus.DBusException, exc:
+			except dbus.DBusException as exc:
 				pretty.print_error(__name__, type(exc).__name__, exc)
 		if csize == self._contacts:
 			return None

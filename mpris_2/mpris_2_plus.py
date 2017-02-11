@@ -131,7 +131,7 @@ class PlaylistSource(Source):
                 for playlist in self.playlists.GetPlaylists(
                         0, 20, Playlist_Ordering.LAST_PLAY_DATE, False):
                     yield  PlaylistLeaf(playlist, self.mpris_uri)
-            except Exception, exc:
+            except Exception as exc:
                 pretty.print_debug(__name__, 'exceptions', exc)
 
         

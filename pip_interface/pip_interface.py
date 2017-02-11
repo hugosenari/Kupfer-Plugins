@@ -11,78 +11,106 @@ __description__ = _("""
 
 #optional:
 # should be tuples of names of classes in the plugin
-#__kupfer_sources__ = ("YourPluginSource",)
-#__kupfer_actions__ = ("PluginActionName",)
-#other options:
-#__kupfer_text_sources__ = ("PLUGIN_TEXT_SOURCES",)
-#__kupfer_action_generators__ = ("PLUGIN_ACTION_GENERATORS",)
-#__kupfer_contents__ = ("PLUGIN_CONTENTS",)
+__kupfer_sources__ = ("PyPiSource",)
+__kupfer_actions__ = ("InstallAction", "SearchPackageAction", "UninstallAction")
 
 #if your plugin needs user settings
-#from kupfer.plugin_support import PluginSettings
-#__kupfer_settings__ = PluginSettings( 
-#    {
-#        "key" : "pip_interface_KEY",
-#        "label": _("SETTING_LABEL"),
-#        "type": str,
-#        "value": "SETTING_DEFAULT_VALUE",
-#    }, 
-#    {
-#        "key" : "pip_interfaceOTHER_KEY",
-#        "label": _("OTHER_SETTING_LABEL"),
-#        "type": int,
-#        "value": "OTHER_SETTING_DEFAULT_VALUE",
-#        "alternatives": OTHER_SETTING_LIST_OF_ALTERNATIVES
-#    },
-#)
-#then you can get setting:
-#__kupfer_settings__["pip_interface_KEY"]
+from kupfer.plugin_support import PluginSettings
+__kupfer_settings__ = PluginSettings( 
+    {
+        "key" : "pip_interface_index_uri",
+        "label": _("PyPi Index"),
+        "type": str,
+        "value": "https://pypi.python.org/simple",
+    },
+    {
+        "key" : "pip_interface_target",
+        "label": _("Target Directory"),
+        "type": str,
+        "value": None,
+    },
+    {
+        "key" : "pip_interface_root",
+        "label": _("Root Directory"),
+        "type": str,
+        "value": None,
+    },
+)
+
+def convert_param(name):
+    name = name.replace('"pip_interface_','')
+    name = name.replace('_', '-')
+    name = '--' + name
+    return name
+
+def get_params():
+    params = []
+    for key, val in __kupfer_settings__.items():
+        param = convert_param(key)
+        if val:
+            params.append(param)
+            params.append(val)
+    return params
+    
+
+from kupfer.objects import Leaf
+class YourPluginLeaf(Leaf):
+    def __init__(self, obj):
+        Leaf.__init__(obj, _("Plugin Leaf Name"))
+
+    def get_actions(self):
+        yield InstallAction
+        yield UninstallAction
 
 
-#PLUGINS LEAFS
-#leafs are plugin objects
-#ie: TextLeaf, FileLeaf, ContactLeaf, EmailLeaf, FolderLeaf, ApplicationLeaf...
-#from kupfer.objects import Leaf
-#class YourPluginLeaf(Leaf):
-#    #required
-#    #init your leaf object
-#    def __init__(self, obj):
-#        ''' '''
-#        super(self.__class__, self).__init__(obj, _("Plugin Leaf Name"))
-#        #do something else with object
-#        #you can get object anywhere in this class using self.object
-#
-#    #optional
-#    #return list of actions that can work with this object
-#    def get_actions(self):
-#        ''' '''
-#        yield Plugin_Action_name
+from kupfer.objects import Action
+from kupfer.objects import TextLeaf
+from pip.commands.install import InstallCommand
+class InstallAction(Action):
+    def __init__(self):
+        Action.__init__(self, name=_("Install Package"))
+
+    def activate(self, leaf):
+        params = get_params()
+        if 'name' in leaf.object:
+            params.append(leaf.object['name'])
+        else:
+            params.append(str(leaf.object))
+        InstallCommand().main(params)
+
+    def valid_for_item(self, leaf):
+        return bool(leaf)
+
+    def item_types(self):
+        yield TextLeaf
 
 
-#PLUGIN ACTIONS
-#actions are what your plugin can do with objects
-#ie: OpenFile, Delete, Edit, PlayNext...
-#from kupfer.objects import Action
-#class PluginActionName(Action):
-#    #required
-#
-#    def __init__(self):
-#        Action.__init__(self, name=_("Action Name"))
-#
-#    #do here something with your object
-#    def activate(self, obj):
-#        ''' '''
-#        #obj in most of case are a leaf
-#
-#    def valid_for_item(self, leaf):
-#        """Whether action can be used with exactly @item"""
-#        return bool(leaf)
-#
-#    #optional
-#    #return list of object that can be activated with this
-#    #reverse version of get_actions defined in leaf
-#    def item_types(self):
-#        ''' '''
+class UninstallAction(Action):
+    def __init__(self):
+        Action.__init__(self, name=_("Uninstall Package"))
+
+    def activate(self, obj):
+        ''' '''
+
+    def valid_for_item(self, leaf):
+        return bool(leaf)
+
+    def item_types(self):
+        yield TextLeaf
+
+
+class SearchPackageAction(Action):
+    def __init__(self):
+        Action.__init__(self, name=_("Action Name"))
+
+    def activate(self, obj):
+        ''' '''
+
+    def valid_for_item(self, leaf):
+        return bool(leaf)
+
+    def item_types(self):
+        yield TextLeaf
 
 
 #PLUGIN_SOURCES
