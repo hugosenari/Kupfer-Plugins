@@ -24,6 +24,8 @@ WIP/DONE:
  * Restart running applications
 * [Shortcuts](./shortcuts):
  * List and execute shortcuts of some application
+* [URL Encode](./url_encode):
+ * Encode/Decode URL
 
 
 TODO:
