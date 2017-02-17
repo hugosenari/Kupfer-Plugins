@@ -26,7 +26,8 @@ Require Kupfer http://engla.github.io/kupfer/
 Features
 --------
 
-* TODO
+* Encode url using urllib.quote
+* Dencode url using urllib.unquote
 
 Install
 -------
