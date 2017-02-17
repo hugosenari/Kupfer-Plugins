@@ -1,5 +1,5 @@
 __kupfer_name__ = _("URL Encode")
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __author__ = "Hugo Sena Ribeiro <hugosenari@gmail.com>"
 __description__ = _("""Decode and encode actions for kupfer""")
 __kupfer_actions__ = ("URLEncode", "URLDecode")
