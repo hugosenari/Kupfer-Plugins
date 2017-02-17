@@ -1,7 +1,7 @@
 Kupfer Plugins
 ==============
 
-My custom plugins for [kupfer](http://engla.github.io/kupfer/)
+My custom plugins for [kupfer](https://github.com/kupferlauncher/kupfer/)
 
 WIP/DONE:
 ---------
