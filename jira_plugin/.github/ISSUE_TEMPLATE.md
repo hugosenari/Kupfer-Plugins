@@ -1,4 +1,4 @@
-* Jira version:
+* Jira Plugin version:
 * Python version:
 * Operating System:
 

@@ -41,7 +41,8 @@ class URLDecode(Action):
         return TextLeaf(result)
     
     def item_types(self):
-        return UrlLeaf, TextLeaf
+        yield UrlLeaf
+        yield TextLeaf
     
     def has_result(self):
         return True

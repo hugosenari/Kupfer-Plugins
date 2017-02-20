@@ -11,7 +11,7 @@ try:
 except:
     from ConfigParser import ConfigParser  # @UnresolvedImport @Reimport
 
-plugin_module = 'jira'
+plugin_module = 'jira_plugin'
 plugin_path = path.dirname(path.abspath(__file__))
 
 
