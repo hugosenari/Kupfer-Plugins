@@ -84,6 +84,7 @@ dist: clean ## builds source and wheel package
 	python setup.py sdist
 
 register: clean ## register package at pypi
+	python setup.py sdist
 	twine register dist/kupfer_plugin_empathetic*.tar.gz
 
 install: clean ## install the package to the active Python's site-packages
