@@ -4,7 +4,7 @@ __author__ = _('Hugo Sena Ribeiro <hugosenari@gmail.com>')
 __description__ = _('''Kupfer plugin to control Jira''')
 
 __kupfer_sources__ = ("ProjectSource",)
-__kupfer_actions__ = ("Issue", "Show", "Comment", )# "Close", )# "Assign")
+__kupfer_actions__ = ("Issue", "Show", "Comment", "SaveChanges")
 
 
 import re
@@ -33,10 +33,10 @@ from kupfer.objects import Leaf
 
 
 class IssueLeaf(Leaf):
-    def __init__(self, obj, jira, fields=None):
+    def __init__(self, obj, fields=None, transition=None):
         Leaf.__init__(self, obj, obj.key)
-        self.jira = jira
         self.fields = fields
+        self.transition = None
         
     def get_description(self):
         return self.fields or self.object.fields.summary
@@ -66,24 +66,25 @@ class ProjectSource(Source):
         self.resource = initialize_jira()
 
 
+jira_jira = None
 def initialize_jira():
-    jira_url = __kupfer_settings__['jira_url']
-    jira_login = __kupfer_settings__['jira_login']
-    if jira_url and \
-        jira_login and \
-        jira_login.username and \
-        jira_login.password:
-        return JIRA(jira_url,
-            basic_auth=(
-                jira_login.username,
-                jira_login.password
+    if not jira_jira:
+        jira_url = __kupfer_settings__['jira_url']
+        jira_login = __kupfer_settings__['jira_login']
+        if jira_url and \
+            jira_login and \
+            jira_login.username and \
+            jira_login.password:
+            jira_jira = JIRA(jira_url,
+                basic_auth=(
+                    jira_login.username,
+                    jira_login.password
+                )
             )
-        )
+    return jira_jira
 
 
 from kupfer.objects import Action, TextLeaf
-
-
 class Issue(Action):
     def __init__(self):
         Action.__init__(self, name="Jira Issue")
@@ -91,7 +92,8 @@ class Issue(Action):
     
     def activate(self, item):
         self.jira = self.jira or initialize_jira()
-        return IssueLeaf(self.jira.issue(item.object), self.jira)
+        i = get_issue(item, self.jira)
+        return IssueLeaf(i)
     
     def item_types(self):
         yield TextLeaf
@@ -148,6 +150,7 @@ class Comment(Action):
         self.jira = self.jira or initialize_jira()
         i = get_issue(item, self.jira)
         comment = self.jira.add_comment(i, iobj.object)
+        return item
             
     def valid_for_item(self, item):
         return is_issue(item)
@@ -160,6 +163,37 @@ class Comment(Action):
 
     def valid_object(self, iobj, for_item=None):
         return type(iobj) is TextLeaf
+    
+    def has_result(self):
+        return True
+
+
+class SaveChanges(Action):
+    def __init__(self):
+        Action.__init__(self, name="Save issue changes")
+        self.jira = None
+    
+    def item_types(self):
+        yield IssueLeaf
+
+    def valid_for_item(self, item):
+        return item.fields or item.transition
+    
+    def get_description(self):
+        return "Send changes to server"
+
+    def activate(self, item, iobj):
+        self.jira = self.jira or initialize_jira()
+        i = get_issue(item, self.jira)
+        if item.transition:
+            if item.fields:
+                self.jira.transition_issue(i, item.transition, fields=item.fields)
+            else:
+                self.jira.transition_issue(i, item.transition)
+        else:
+            i.update(fields=item.fields)
+        item.fields = None
+        item.transition = None
 
 
 issue_regexp = '^[a-zA-Z0-9]+-[\d]+$'
