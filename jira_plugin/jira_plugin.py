@@ -31,8 +31,26 @@ __kupfer_settings__ = PluginSettings(
 
 from kupfer.objects import Leaf 
 
-
+FIELD_BLACK_LIST = (
+    'customfield.*',
+    'comment',
+    '.*timeestimate.*',
+    'lastViewd',
+    'issuelinks',
+    'aggragate.*',
+    'votes',
+    'attachement',
+    'updated',
+    'subtasks',
+    'worklog',
+    'resolutiondate',
+    'components',
+    'issuetype',
+    'status',
+    'reporter'
+)
 class IssueLeaf(Leaf):
+    jira_jira = None
     def __init__(self, obj, fields=None, transition=None):
         Leaf.__init__(self, obj, obj.key)
         self.fields = fields
@@ -40,6 +58,18 @@ class IssueLeaf(Leaf):
         
     def get_description(self):
         return self.fields or self.object.fields.summary
+
+    def get_actions(self):
+        valid_fields = []
+        for field in self.object.raw['fields'].items():
+            for block in FIELD_BLACK_LIST:
+                if re.match(block, field[0]):
+                    break
+            else:
+                print("valid field", field[0])
+                valid_fields.append(field)
+        for field in valid_fields:
+                yield IssueChange(field, self.object, initialize_jira())
 
 
 class ProjectLeaf(Leaf):
@@ -66,22 +96,21 @@ class ProjectSource(Source):
         self.resource = initialize_jira()
 
 
-jira_jira = None
 def initialize_jira():
-    if not jira_jira:
+    if not IssueLeaf.jira_jira:
         jira_url = __kupfer_settings__['jira_url']
         jira_login = __kupfer_settings__['jira_login']
         if jira_url and \
             jira_login and \
             jira_login.username and \
             jira_login.password:
-            jira_jira = JIRA(jira_url,
+            IssueLeaf.jira_jira = JIRA(jira_url,
                 basic_auth=(
                     jira_login.username,
                     jira_login.password
                 )
             )
-    return jira_jira
+    return IssueLeaf.jira_jira
 
 
 from kupfer.objects import Action, TextLeaf
@@ -103,7 +132,6 @@ class Issue(Action):
     
     def has_result(self):
         return True
-
 
 class Show(Action):
     def __init__(self):
@@ -194,6 +222,48 @@ class SaveChanges(Action):
             i.update(fields=item.fields)
         item.fields = None
         item.transition = None
+
+
+class IssueChange(Action):
+    def __init__(self, field, issue, jira):
+        Action.__init__(self, name="Change " + field[0])
+        self.field = field
+        self.jira = jira
+        self.issue = issue
+
+    def requires_object(self):
+        return True
+
+    def activate(self, item, iobj):
+        print(self.field, self.issue, self.jira, item, iobj)
+
+    def valid_object(self, iobj, for_item=None):
+        return type(iobj) is TextLeaf
+
+    # def object_source(self, for_item=None):
+    #     return _IssueFieldVal(self.field, self.issue, self.jira)
+
+
+class _IssueFieldValues(Source):
+    def __init__(self, field, issue, jira):
+        Source.__init__(self, _("Issue " + field[0] + " values"))
+        self.field = field
+        self.jira = jira
+        self.issue = issue
+
+    def get_items(self):
+        return ()
+
+    def provides(self):
+        yield _IssueField
+
+
+class _IssueField(Leaf):
+    def __init__(self, obj, field, issue, jira):
+        Leaf.__init__(self, obj, "Issue " + field[0] + " value")
+        self.field = field
+        self.jira = jira
+        self.issue = issue
 
 
 issue_regexp = '^[a-zA-Z0-9]+-[\d]+$'
