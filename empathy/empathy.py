@@ -242,7 +242,7 @@ class ContactsSource(AppLeafContentMixin, ToplevelGroupingSource,
 					contact_attributes = opts['connection'].Get(CONTACT_IFACE, "ContactAttributeInterfaces")
 					contact_attributes = [str(a) for a in contact_attributes]			
 					contact_details = opts['connection'].GetContactAttributes(contacts, contact_attributes, False)
-					for contact, details in contact_details.iteritems():
+					for contact, details in contact_details.items():
 						try: #ignore contact errors
 							status_code = details.get(
 								_ATTRIBUTES.get("presence"),
@@ -286,7 +286,7 @@ class StatusSource(Source):
 		Source.__init__(self, _("Empathy Account Status"))
 
 	def get_items(self):
-		for status, name in _STATUSES.iteritems():
+		for status, name in _STATUSES.items():
 			yield AccountStatus(status, name)
 
 	def provides(self):
