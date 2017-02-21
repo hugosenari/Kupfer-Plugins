@@ -8,8 +8,12 @@ WIP/DONE:
 
 * [Eclipse](./k2e):
  * Call eclipse common task
+* [Empathetic](./empathetic):
+ * Access to Empathy Contacts (Fork of [Tuxcanfly](https://github.com/tuxcanfly/kupfer/blob/master/kupfer/plugin/empathy.py))
 * [GIT](./git):
  * Git commands for kupfer
+* [Jira](./jira_plugin):
+ * *WIP* Control Atlassian Jira
 * [Plugins Marketplace](./marketplace)
  * Similar to Eclipse Marketplace for kupfer plugins
 * [MPRI2](./mpris_2):
@@ -48,8 +52,6 @@ TODO:
  * Android ADB helper
 * Twitter
  * Post text to twitter
-* Jira
- * Control Atlassian Jira
 * Curreios
  * Get status of Correios/BR track
 * SINESP
