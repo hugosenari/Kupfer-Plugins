@@ -45,24 +45,36 @@ class PyPiPluginLeaf(Leaf):
         return self.object.get('summary')
 
 
-from kupfer import uiutils
+from kupfer import uiutils, task
 from kupfer.objects import Action
-from pip.commands.install import InstallCommand
 class InstallPlugin(Action):
     def __init__(self):
         Action.__init__(self, name=_("Install"))
     
     def activate(self, leaf):
-        InstallCommand().main(['--upgrade', '--user', leaf.object.get("name")] )
-        uiutils.show_notification(_("Plugin Installed"), 
-            "Now enable {} at preferences".format(leaf.name),
-            icon_name=self.get_icon_name())
+        return InstallTask(leaf)
 
     def item_types(self):
         yield PyPiPluginLeaf
 
-    def valid_for_item(self, leaf):
+    def is_async(self):
         return True
+
+
+from pip.commands import install
+
+class InstallTask(task.ThreadTask):
+    def __init__(self, leaf):
+        super(InstallTask, self).__init__("Installing plugin " + leaf.object.get("name"))
+        self.leaf = leaf
+    
+    def thread_do(self):
+        leaf = self.leaf
+        from pip.utils.logging import _log_state
+        _log_state.indentation = 0
+        install.InstallCommand().main(['--upgrade', '--user', leaf.object.get("name")] )
+        uiutils.show_notification(_("Plugin Installed"), 
+            "Now enable {} at preferences".format(leaf.name), icon_name='info')
 
 
 from kupfer.objects import Source
