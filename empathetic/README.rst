@@ -26,7 +26,7 @@ Require Kupfer https://github.com/kupferlauncher/kupfer/
 Features
 --------
 
-* TODO
+* Access Empathy contacs
 
 Install
 -------

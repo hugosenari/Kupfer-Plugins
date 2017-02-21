@@ -4,7 +4,7 @@ __kupfer_name__ = _("Empathetic")
 __kupfer_sources__ = ("ContactsSource", )
 __kupfer_actions__ = ("ChangeStatus", 'OpenChat')
 __description__ = _("Access to Empathy Contacts")
-__version__ = "2010-10-17"
+__version__ = "0.1.0"
 __author__ = "Jakh Daven <tuxcanfly@gmail.com>"
 
 import dbus
