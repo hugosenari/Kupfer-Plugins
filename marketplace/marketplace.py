@@ -61,7 +61,6 @@ class InstallPlugin(Action):
         return True
 
 
-from pip.commands import install
 
 class InstallTask(task.ThreadTask):
     def __init__(self, leaf):
@@ -69,8 +68,11 @@ class InstallTask(task.ThreadTask):
         self.leaf = leaf
     
     def thread_do(self):
-        leaf = self.leaf
+        # TODO: change import to popen https://github.com/pypa/pip/issues/3889
+        # NOTE: which pip will use? pip, pip2 or pip3?
+        from pip.commands import install
         from pip.utils.logging import _log_state
+        leaf = self.leaf
         _log_state.indentation = 0
         install.InstallCommand().main(['--upgrade', '--user', leaf.object.get("name")] )
         uiutils.show_notification(_("Plugin Installed"), 
