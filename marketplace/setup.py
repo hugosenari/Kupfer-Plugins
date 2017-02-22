@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from os import path
+from os import path, environ
 from subprocess import call
 from setuptools import setup
 from setuptools.command.install import install
@@ -17,7 +17,9 @@ plugin_path = path.dirname(path.abspath(__file__))
 class CopyPlugin(install):
 
     def run(self):
-        dirs = ["~", ".local", "share", "kupfer", "plugins"]
+        default_data_home = path.join("~", ".local", "share")
+        data_home = environ.get("XDG_DATA_HOME", default_data_home)
+        dirs = [data_home, "kupfer", "plugins"]
         install_path = path.expanduser(path.join(*dirs))
         print("mkdir {}".format(install_path))
         call("mkdir -p {}".format(install_path), shell=True)
