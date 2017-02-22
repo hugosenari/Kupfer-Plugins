@@ -24,6 +24,15 @@ Install
 pip install kupfer_plugin_marketplace
 
 
+Todo
+----
+
+* Add/make 'Install and Enable' option;
+* Show installed plugins with 'installed' flag;
+* Add 'Uninstall' Action;
+* Add Update Action (current install does it);
+
+
 Credits
 -------
 
