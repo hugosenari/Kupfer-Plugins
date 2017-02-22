@@ -55,7 +55,7 @@ setup(
     cmdclass={'install': CopyPlugin},
     py_modules=[plugin_module, plugin_module + '_plus'],
     zip_safe=False,
-    version='0.1.0',
+    version='0.1.1',
     install_requires=['mpris2'],
     **dict(convert(read_cfg()))
 )

@@ -9,7 +9,7 @@ __kupfer_actions__ = ('PlayPauseAction',
                       'InfoAction',
                       'PlayerOpenUriAction',)
 __description__ = _("Control any mpris2 media player\n\n Default player changes to last media player you use.")
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __author__ = "Hugo Ribeiro <hugosenari gmail com>"
 
 from kupfer import pretty
