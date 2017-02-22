@@ -77,13 +77,19 @@ servedocs: docs ## compile the docs watching for changes
 	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
 
 release: clean ## package and upload a release
-	python setup.py sdist upload
-	python setup.py bdist_wheel upload
+	python setup.py sdist
+	twine upload dist/kupfer_plugin_*.tar.gz
 
 dist: clean ## builds source and wheel package
 	python setup.py sdist
-	python setup.py bdist_wheel
-	ls -l dist
+
+register: clean ## register package at pypi
+	python setup.py sdist
+	twine register dist/kupfer_plugin_*.tar.gz
 
 install: clean ## install the package to the active Python's site-packages
 	python setup.py install
+
+configure: clean ## install dev packages
+	pip install --upgrade pip
+	pip install -r requirements_dev.txt

@@ -78,13 +78,14 @@ servedocs: docs ## compile the docs watching for changes
 
 release: clean ## package and upload a release
 	python setup.py sdist
-	twine upload dist/kupfer_plugin_jira_plugin*.tar.gz
+	twine upload dist/kupfer_plugin_*.tar.gz
 
 dist: clean ## builds source and wheel package
 	python setup.py sdist
 
 register: clean ## register package at pypi
-	twine register dist/kupfer_plugin_jira_plugin*.tar.gz
+	python setup.py sdist
+	twine register dist/kupfer_plugin_*.tar.gz
 
 install: clean ## install the package to the active Python's site-packages
 	python setup.py install
