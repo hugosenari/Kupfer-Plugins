@@ -27,9 +27,10 @@ __kupfer_settings__ = PluginSettings(
 
 def namelize(name):
     name = name or ''
-    name = name.replace('kupfer_plugin_', '')
     name = name.replace('_', ' ')
-    name = name.capitalize()
+    name = name.replace('-', ' ')
+    name = name.replace('kupfer plugin ', '')
+    name = name.title()
     return name
 
 
