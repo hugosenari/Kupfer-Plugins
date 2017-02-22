@@ -3,7 +3,7 @@
 # http://engla.github.io/kupfer/Documentation/PluginAPI.html
 
 __kupfer_name__ = _("Marketplace")
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 __author__ = "Hugo Sena Ribeiro <hugosenari@gmail.com>"
 __description__ = _("""Search and install 3th party plugins for kupfer""")
 __kupfer_sources__ = ("MarketplaceSource",)
