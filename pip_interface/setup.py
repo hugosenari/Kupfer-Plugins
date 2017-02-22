@@ -5,7 +5,6 @@ from os import path
 from subprocess import call
 from setuptools import setup
 from setuptools.command.install import install
-from setuptools.command import easy_install
 try:
     from configparser import ConfigParser  # @UnusedImport
 except:
@@ -26,9 +25,6 @@ class CopyPlugin(install):
         plugin_file = path.join(plugin_path, plugin_module + '.py')
         print("Copy {} to {}".format(plugin_file, install_path))
         call("cp -p {} {}".format(plugin_file, install_path), shell=True)
-        
-        print("Install dependency")
-        easy_install.main(['--user', 'pip'] )
 
 
 def read_cfg():
