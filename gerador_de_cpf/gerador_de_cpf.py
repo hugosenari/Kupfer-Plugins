@@ -80,7 +80,7 @@ def cpf():
 __kupfer_name__ = _("Gerador de CPF")
 __kupfer_sources__ = ("GenCPFSource", )
 __description__ = _("Gera uma lista de CPF")
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __author__ = "Hugo Ribeiro"
 
 from kupfer.obj.objects import TextLeaf
