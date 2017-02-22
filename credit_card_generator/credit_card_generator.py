@@ -173,7 +173,7 @@ def output(title, numbers):
 __kupfer_name__ = _("Credit Card Generator")
 __kupfer_sources__ = ("GenCCSource", )
 __description__ = _("Create Random Credit Card Numbers")
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __author__ = "Hugo Ribeiro"
 
 from kupfer.obj.objects import TextLeaf
