@@ -180,11 +180,12 @@ class Jiraya(object):
         
     def activate(self, obj, **kwds):
         self.jira = self.jira or initialize_jira()
+        print("\n\n\n\nNINJA JIRAYA\n\n\n")
         if self.jira:
             return self.activate_jira(obj, **kwds)
 
 
-class Issue(Action, Jiraya):
+class Issue(Jiraya, Action):
     def __init__(self):
         Action.__init__(self, name="Jira Issue")
         Jiraya.__init__(self)
@@ -203,10 +204,10 @@ class Issue(Action, Jiraya):
         return True
 
 
-class Show(Action, Jiraya):
+class Show(Jiraya, Action):
     def __init__(self):
-        Action.__init__(self, name="Show Issue/Project")
         Jiraya.__init__(self)
+        Action.__init__(self, name="Show Issue/Project")
     
     def get_description(self):
         return "Open issue/project in browser"
@@ -231,7 +232,7 @@ class Show(Action, Jiraya):
         yield TextLeaf
 
 
-class Comment(Action, Jiraya):
+class Comment(Jiraya, Action):
     def __init__(self):
         Action.__init__(self, name="Add comment to issue")
         Jiraya.__init__(self)
@@ -264,7 +265,7 @@ class Comment(Action, Jiraya):
         return True
 
 
-class SaveChanges(Action, Jiraya):
+class SaveChanges(Jiraya, Action):
     def __init__(self):
         Action.__init__(self, name="Save issue changes")
         Jiraya.__init__(self)
@@ -291,7 +292,7 @@ class SaveChanges(Action, Jiraya):
         item.transition = None
 
 
-class IssueChange(Action, Jiraya):
+class IssueChange(Jiraya, Action):
     def __init__(self, field, issue, jira):
         Action.__init__(self, name="Change " + field[0])
         Jiraya.__init__(self, jira)
