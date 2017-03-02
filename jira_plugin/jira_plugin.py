@@ -166,12 +166,12 @@ class ProjectSource(Source):
         Source.__init__(self, "Jira Projects")
     
     def get_items(self):
-        if resource:
-            for obj in self.resource.projects():
-                yield ProjectLeaf(obj, resource)
+        if ProjectSource.resource:
+            for obj in ProjectSource.resource.projects():
+                yield ProjectLeaf(obj, ProjectSource.resource)
     
     def initialize(self):
-        resource = initialize_jira()
+        ProjectSource.resource = initialize_jira()
 
 
 class Jiraya(object):
