@@ -1,13 +1,13 @@
 __kupfer_name__ = _('Kupfer Kering')
 __version__ = '0.1.0'
 __author__ = 'Hugo Sena Ribeiro <hugosenari@gmail.com>'
+__kupfer_sources__ = ("KeysSource",)
+__kupfer_actions__ = ("AddKey", "RemoveKey", "Username")
 __description__ = '''
 Use kupfer index your passwords
 
 Use copy action to copy password
 '''
-__kupfer_sources__ = ("KeysSource",)
-__kupfer_actions__ = ("AddKey", "RemoveKey", "Username")
 
 
 import keyring
