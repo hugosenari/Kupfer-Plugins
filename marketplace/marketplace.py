@@ -25,6 +25,16 @@ __kupfer_settings__ = PluginSettings(
 )
 
 
+from kupfer.objects import Leaf
+from kupfer import uiutils, task
+from kupfer.objects import Action
+from kupfer.objects import Source
+try:
+    import xmlrpclib
+except ImportError:
+    import xmlrpc.client as xmlrpclib
+
+
 def namelize(name):
     name = name or ''
     name = name.replace('_', ' ')
@@ -34,7 +44,6 @@ def namelize(name):
     return name
 
 
-from kupfer.objects import Leaf
 class PyPiPluginLeaf(Leaf):
     def __init__(self, obj):
         super(self.__class__, self).__init__(
@@ -46,8 +55,6 @@ class PyPiPluginLeaf(Leaf):
         return self.object.get('summary')
 
 
-from kupfer import uiutils, task
-from kupfer.objects import Action
 class InstallPlugin(Action):
     def __init__(self):
         Action.__init__(self, name=_("Install"))
@@ -60,7 +67,6 @@ class InstallPlugin(Action):
 
     def is_async(self):
         return True
-
 
 
 class InstallTask(task.ThreadTask):
@@ -80,22 +86,17 @@ class InstallTask(task.ThreadTask):
             "Now enable {} at preferences".format(leaf.name), icon_name='info')
 
 
-from kupfer.objects import Source
-try:
-    import xmlrpclib
-except ImportError:
-    import xmlrpc.client as xmlrpclib
 class MarketplaceSource(Source):
     def __init__(self):
-        super(self.__class__, self).__init__(_("Plugin Marketplace"))
+        Source.__init__(self, _("Plugin Marketplace"))
+        self.resource = None
     
-    #return the list of leaf
     def get_items(self):
         uri = __kupfer_settings__["marketplace_index"]
-        my_resource = xmlrpclib.ServerProxy(uri)
-        if not my_resource is None:
+        self.resource = self.resource or xmlrpclib.ServerProxy(uri)
+        if not self.resource is None:
             keywords = __kupfer_settings__["marketplace_keywords"]
-            for obj in my_resource.search(
+            for obj in self.resource.search(
                 {'keywords': keywords},'or'
             ):
                 yield PyPiPluginLeaf(obj)
