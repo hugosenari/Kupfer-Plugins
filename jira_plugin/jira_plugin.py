@@ -4,10 +4,11 @@ __author__ = _('Hugo Sena Ribeiro <hugosenari@gmail.com>')
 __description__ = _('''Kupfer plugin to control Jira''')
 
 __kupfer_sources__ = ("ProjectSource",)
-__kupfer_actions__ = ("Issue", "Show", "Comment", "SaveChanges")
+__kupfer_actions__ = ("Issue", "Show", "Comment", "Assign", "ChangeStatus")
 
 
 import re
+import string
 from jira import JIRA
 from jira import Issue as issue
 from jira import Project as project
@@ -35,23 +36,13 @@ __kupfer_settings__ = PluginSettings(
         "value": ""
     }
 )
-FIELD_BLACK_LIST = (
-    'customfield.*',
-    'comment',
-    '.*timeestimate.*',
-    'lastViewd',
-    'issuelinks',
-    'aggragate.*',
-    'votes',
-    'attachement',
-    'updated',
-    'subtasks',
-    'worklog',
-    'resolutiondate',
-    'components',
-    'issuetype',
-    'status',
-    'reporter'
+FIELD_WHITE_LIST = (
+    'labels',
+    'priority',
+    'timespent',
+    'description', 
+    'summary',
+    'environment'
 )
 issue_regexp = '^[a-zA-Z0-9]+-[\d]+$'
 project_regexp = '^[a-zA-Z0-9]+$'
@@ -90,6 +81,13 @@ def get_issue(item, jira):
         key = str(item.object)
     if key:
         return jira.issue(key)
+    
+
+def get_issue_leaf(item, jira):
+    if isinstance(item, IssueLeaf):
+        return item
+    i = get_issue(item, jira)
+    return IssueLeaf(i, jira=jira)
 
 
 def is_issue(item):
@@ -138,17 +136,13 @@ class IssueLeaf(Leaf):
     def get_description(self):
         return self.fields or self.object.fields.summary
     
-    def get_actions(self):
-        valid_fields = []
-        for field in self.object.raw['fields'].items():
-            for block in FIELD_BLACK_LIST:
-                if re.match(block, field[0]):
-                    break
-            else:
-                print("valid field", field[0])
-                valid_fields.append(field)
-        for field in valid_fields:
-            yield IssueChange(field, self.object, self.jira)
+    # def get_actions(self):
+    #     valid_fields = []
+    #     for field in self.object.raw['fields'].items():
+    #         for show in FIELD_WHITE_LIST:
+    #             if re.match(show, field[0]):
+    #                 yield IssueChange(field, self.object, self.jira)
+    #                 break
 
 
 class ProjectLeaf(Leaf):
@@ -176,11 +170,18 @@ class ProjectSource(Source):
 
 class Jiraya(object):
     def __init__(self, jira=None):
-        self.jira = jira
+        self._jira = jira
+        
+    @property
+    def jira(self):
+        self._jira = self._jira or initialize_jira()
+        return self._jira
+
+    @jira.setter
+    def jira(self, value):
+        self._jira = value
         
     def activate(self, obj, **kwds):
-        self.jira = self.jira or initialize_jira()
-        print("\n\n\n\nNINJA JIRAYA\n\n\n")
         if self.jira:
             return self.activate_jira(obj, **kwds)
 
@@ -191,8 +192,7 @@ class Issue(Jiraya, Action):
         Jiraya.__init__(self)
     
     def activate_jira(self, item):
-        i = get_issue(item, self.jira)
-        return IssueLeaf(i, jira=self.jira)
+        return get_issue_leaf(item, self.jira)
     
     def item_types(self):
         yield TextLeaf
@@ -234,7 +234,7 @@ class Show(Jiraya, Action):
 
 class Comment(Jiraya, Action):
     def __init__(self):
-        Action.__init__(self, name="Add comment to issue")
+        Action.__init__(self, name="Add Comment")
         Jiraya.__init__(self)
             
     def valid_for_item(self, item):
@@ -247,7 +247,7 @@ class Comment(Jiraya, Action):
     def activate_jira(self, item, iobj):
         i = get_issue(item, self.jira)
         comment = self.jira.add_comment(i, iobj.object)
-        return item
+        return get_issue_leaf(item, self.jira)
             
     def valid_for_item(self, item):
         return is_issue(item)
@@ -263,6 +263,119 @@ class Comment(Jiraya, Action):
     
     def has_result(self):
         return True
+
+
+class Assign(Jiraya, Action):
+    def __init__(self):
+        Action.__init__(self, name="Assign User")
+        Jiraya.__init__(self)
+            
+    def valid_for_item(self, item):
+        return is_issue(item)
+    
+    def item_types(self):
+        yield IssueLeaf
+        yield TextLeaf
+    
+    def activate_jira(self, item, iobj):
+        i = get_issue(item, self.jira)
+        self.jira.assign_issue(i, iobj.object)
+        return get_issue_leaf(item, self.jira)
+            
+    def valid_for_item(self, item):
+        return is_issue(item)
+
+    def requires_object(self):
+        return True
+
+    def object_types(self, for_item=None):
+        yield TextLeaf
+
+    def valid_object(self, iobj, for_item=None):
+        return type(iobj) is TextLeaf
+    
+    def has_result(self):
+        return True
+
+    def object_source(self, for_item=None):
+        if for_item:
+            item = get_issue_leaf(for_item, self.jira)
+            return _AssignValues(item)
+
+
+class _AssignValues(Source, Jiraya):
+    def __init__(self, issue):
+        Source.__init__(self, _("Users"))
+        Jiraya.__init__(self, issue.jira)
+        self.issue = issue
+
+    def get_items(self):
+        i = get_issue(self.issue, self.jira)
+        users = set()
+        for l in string.lowercase:
+            us = set(self.jira.search_allowed_users_for_issue(l, i))
+            for u in us - users:
+                yield TextLeaf(u.key, u.name)
+            users = users | us
+
+    def provides(self):
+        yield TextLeaf
+
+
+class ChangeStatus(Jiraya, Action):
+    def __init__(self):
+        Action.__init__(self, name="Change Status")
+        Jiraya.__init__(self)
+            
+    def valid_for_item(self, item):
+        return is_issue(item)
+    
+    def item_types(self):
+        yield IssueLeaf
+        yield TextLeaf
+    
+    def activate_jira(self, item, iobj):
+        i = get_issue(item, self.jira)
+        l = get_issue_leaf(item, self.jira)
+        self.jira.transition_issue(i, iobj.object, fields=l.fields)
+        l.fields = None
+        return l
+            
+    def valid_for_item(self, item):
+        return is_issue(item)
+
+    def requires_object(self):
+        return True
+
+    def object_types(self, for_item=None):
+        yield TextLeaf
+
+    def valid_object(self, iobj, for_item=None):
+        return type(iobj) is TextLeaf
+    
+    def has_result(self):
+        return True
+
+    def object_source(self, for_item=None):
+        if for_item:
+            item = get_issue_leaf(for_item, self.jira)
+            return _StatusValues(item)
+
+
+class _StatusValues(Source, Jiraya):
+    def __init__(self, issue):
+        Source.__init__(self, _("Users"))
+        Jiraya.__init__(self, issue.jira)
+        self.issue = issue
+
+    def get_items(self):
+        i = get_issue(self.issue, self.jira)
+        transitions = self.jira.transitions(i)
+        for t in transitions:
+            yield TextLeaf(t["id"], t["name"])
+
+    def provides(self):
+        yield TextLeaf
 
 
 class SaveChanges(Jiraya, Action):
@@ -308,8 +421,8 @@ class IssueChange(Jiraya, Action):
     def valid_object(self, iobj, for_item=None):
         return type(iobj) is TextLeaf
 
-    # def object_source(self, for_item=None):
-    #     return _IssueFieldVal(self.field, self.issue, self.jira)
+    def object_source(self, for_item=None):
+        return _IssueFieldValues(self.field, self.issue, self.jira)
 
 
 class _IssueFieldValues(Source, Jiraya):
@@ -323,12 +436,13 @@ class _IssueFieldValues(Source, Jiraya):
         return ()
 
     def provides(self):
+        yield TextLeaf
         yield _IssueField
 
 
 class _IssueField(Leaf, Jiraya):
     def __init__(self, obj, field, issue, jira):
-        Leaf.__init__(self, obj, "Issue " + field[0] + " value")
+        Leaf.__init__(self, obj, "Issue " + field[0] + " value " + obj)
         Jiraya.__init__(self, jira)
         self.field = field
         self.issue = issue
