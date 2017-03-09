@@ -79,3 +79,6 @@ class SmileyLeaf (TextLeaf):
 
     def get_thumbnail(self, width, height):
         return icons.get_pixbuf_from_file(self._img, width, height)
+    
+    def get_text_representation(self):
+        return str(self.name)
