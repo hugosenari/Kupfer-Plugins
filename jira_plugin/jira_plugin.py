@@ -8,7 +8,6 @@ __kupfer_actions__ = ("Issue", "Show", "Comment", "Assign", "ChangeStatus")
 
 
 import re
-import string
 from jira import JIRA
 from jira import Issue as issue
 from jira import Project as project
@@ -180,10 +179,6 @@ class Jiraya(object):
     @jira.setter
     def jira(self, value):
         self._jira = value
-        
-    def activate(self, obj, **kwds):
-        if self.jira:
-            return self.activate_jira(obj, **kwds)
 
 
 class Issue(Jiraya, Action):
@@ -191,7 +186,7 @@ class Issue(Jiraya, Action):
         Action.__init__(self, name="Jira Issue")
         Jiraya.__init__(self)
     
-    def activate_jira(self, item):
+    def activate(self, item):
         return get_issue_leaf(item, self.jira)
     
     def item_types(self):
@@ -212,7 +207,7 @@ class Show(Jiraya, Action):
     def get_description(self):
         return "Open issue/project in browser"
     
-    def activate_jira(self, item):
+    def activate(self, item):
         url = None
         if is_issue(item):
             i = get_issue(item, self.jira)
@@ -244,7 +239,7 @@ class Comment(Jiraya, Action):
         yield IssueLeaf
         yield TextLeaf
     
-    def activate_jira(self, item, iobj):
+    def activate(self, item, iobj):
         i = get_issue(item, self.jira)
         comment = self.jira.add_comment(i, iobj.object)
         return get_issue_leaf(item, self.jira)
@@ -277,7 +272,7 @@ class Assign(Jiraya, Action):
         yield IssueLeaf
         yield TextLeaf
     
-    def activate_jira(self, item, iobj):
+    def activate(self, item, iobj):
         i = get_issue(item, self.jira)
         self.jira.assign_issue(i, iobj.object)
         return get_issue_leaf(item, self.jira)
@@ -311,12 +306,17 @@ class _AssignValues(Source, Jiraya):
 
     def get_items(self):
         i = get_issue(self.issue, self.jira)
-        users = set()
-        for l in string.lowercase:
-            us = set(self.jira.search_allowed_users_for_issue(l, i))
-            for u in us - users:
+        page_size = 50
+        startAt = 0
+        users = []
+        while users or startAt == 0:
+            users = self.jira.search_assignable_users_for_issues('',
+                issueKey=i,
+                startAt=startAt,
+                maxResults=page_size)
+            for u in users:
                 yield TextLeaf(u.key, u.name)
-            users = users | us
+            startAt = startAt + page_size
 
     def provides(self):
         yield TextLeaf
@@ -334,7 +334,7 @@ class ChangeStatus(Jiraya, Action):
         yield IssueLeaf
         yield TextLeaf
     
-    def activate_jira(self, item, iobj):
+    def activate(self, item, iobj):
         i = get_issue(item, self.jira)
         l = get_issue_leaf(item, self.jira)
         self.jira.transition_issue(i, iobj.object, fields=l.fields)
@@ -392,7 +392,7 @@ class SaveChanges(Jiraya, Action):
     def get_description(self):
         return "Send changes to server"
 
-    def activate_jira(self, item, iobj):
+    def activate(self, item):
         i = get_issue(item, self.jira)
         if item.transition:
             if item.fields:
@@ -415,7 +415,7 @@ class IssueChange(Jiraya, Action):
     def requires_object(self):
         return True
 
-    def activate_jira(self, item, iobj):
+    def activate(self, item, iobj):
         print(self.field, self.issue, self.jira, item, iobj)
 
     def valid_object(self, iobj, for_item=None):
