@@ -62,7 +62,11 @@ class KeysSource(Source):
                 yield KeyLeaf(obj)
     
     def initialize(self):
-        self.resource = keyring.get_keyring().get_default_collection()
+        k = keyring.get_keyring()
+        if hasattr(k, 'get_default_collection'):
+            self.resource = k.get_default_collection()
+        else:
+            self.resource = k.get_preferred_collection()
 
 
 class AddKey(Action):
