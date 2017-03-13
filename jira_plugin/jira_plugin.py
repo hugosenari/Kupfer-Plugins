@@ -3,7 +3,7 @@ __version__ = '0.1.3'
 __author__ = _('Hugo Sena Ribeiro <hugosenari@gmail.com>')
 __description__ = _('''Kupfer plugin to control Jira''')
 
-__kupfer_sources__ = ("ProjectSource",)
+__kupfer_sources__ = ("ProjectSource", "IssueSource")
 __kupfer_actions__ = ("Issue", "Show", "Comment", "Assign", "ChangeStatus")
 
 
@@ -33,6 +33,12 @@ __kupfer_settings__ = PluginSettings(
         "label": "Jira URL",
         "type": str,
         "value": ""
+    },
+    {
+        "key" : "issue_jql",
+        "label": "JQL for source",
+        "type": str,
+        "value": "assignee = currentUser()"
     }
 )
 FIELD_WHITE_LIST = (
@@ -48,8 +54,8 @@ project_regexp = '^[a-zA-Z0-9]+$'
 
 
 def initialize_jira():
-    if ProjectSource.resource:
-        return ProjectSource.resource    
+    if Jiraya.resource:
+        return Jiraya.resource    
     jira_url = __kupfer_settings__['jira_url']
     jira_login = __kupfer_settings__['jira_login']
     if jira_url and \
@@ -57,15 +63,15 @@ def initialize_jira():
         jira_login.username and \
         jira_login.password:
         try:
-            ProjectSource.resource = JIRA(jira_url,
+            Jiraya.resource = JIRA(jira_url,
                 basic_auth=(
                     jira_login.username,
                     jira_login.password
                 )
             )
         except:
-            ProjectSource.resource = None
-    return ProjectSource.resource
+            Jiraya.resource = None
+    return Jiraya.resource
 
 
 def get_issue(item, jira):
@@ -153,21 +159,8 @@ class ProjectLeaf(Leaf):
         return self.object.name
 
 
-class ProjectSource(Source):
-    resource = None
-    def __init__(self):
-        Source.__init__(self, "Jira Projects")
-    
-    def get_items(self):
-        if ProjectSource.resource:
-            for obj in ProjectSource.resource.projects():
-                yield ProjectLeaf(obj, ProjectSource.resource)
-    
-    def initialize(self):
-        ProjectSource.resource = initialize_jira()
-
-
 class Jiraya(object):
+    resource = None
     def __init__(self, jira=None):
         self._jira = jira
         
@@ -179,6 +172,40 @@ class Jiraya(object):
     @jira.setter
     def jira(self, value):
         self._jira = value
+
+
+class ProjectSource(Source, Jiraya):
+    def __init__(self):
+        Source.__init__(self, "Jira Projects")
+        Jiraya.__init__(self)
+    
+    def get_items(self):
+        if self.jira:
+            for obj in self.jira.projects():
+                yield ProjectLeaf(obj, self.jira)
+
+
+class IssueSource(Source, Jiraya):
+    resource = None
+    def __init__(self):
+        Source.__init__(self, "Jira Issues")
+        Jiraya.__init__(self)
+    
+    def get_items(self, start_at=0):
+        jql = __kupfer_settings__['issue_jql']
+        page_size = 50
+        if self.jira:
+            issues = self.jira.search_issues(jql,
+                startAt=start_at,
+                maxResults=page_size)
+            for i in issues:
+                yield IssueLeaf(i)
+            if len(issues) == page_size:
+                for issue_leaf in self.get_items(start_at + page_size):
+                    yield issue_leaf
+
+    def is_dynamic(self):
+        return True
 
 
 class Issue(Jiraya, Action):
@@ -304,19 +331,18 @@ class _AssignValues(Source, Jiraya):
         Jiraya.__init__(self, issue.jira)
         self.issue = issue
 
-    def get_items(self):
+    def get_items(self, start_at=0):
         i = get_issue(self.issue, self.jira)
         page_size = 50
-        startAt = 0
-        users = []
-        while users or startAt == 0:
-            users = self.jira.search_assignable_users_for_issues('',
+        users = self.jira.search_assignable_users_for_issues('',
                 issueKey=i,
-                startAt=startAt,
+                startAt=start_at,
                 maxResults=page_size)
-            for u in users:
-                yield TextLeaf(u.key, u.name)
-            startAt = startAt + page_size
+        for u in users:
+            yield TextLeaf(u.key, u.name)
+        if len(users) == page_size:
+            for leaf in self.get_items(start_at + page_size):
+                yield leaf
 
     def provides(self):
         yield TextLeaf
