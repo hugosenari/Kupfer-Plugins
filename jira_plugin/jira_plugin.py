@@ -4,7 +4,7 @@ __author__ = _('Hugo Sena Ribeiro <hugosenari@gmail.com>')
 __description__ = _('''Kupfer plugin to control Jira''')
 
 __kupfer_sources__ = ("ProjectSource", "IssueSource")
-__kupfer_actions__ = ("Issue", "Show", "Comment", "Assign", "ChangeStatus")
+__kupfer_actions__ = ("Issue", "Show", "Comment", "Assign")
 
 
 import re
