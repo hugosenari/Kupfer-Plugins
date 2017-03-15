@@ -133,10 +133,17 @@ def is_project(item):
 
 class IssueLeaf(Leaf):
     def __init__(self, obj, fields=None, transition=None, jira=None):
-        Leaf.__init__(self, obj, obj.key)
+        Leaf.__init__(self, obj, IssueLeaf.get_name(obj))
         self.fields = fields
         self.transition = None
         self.jira = jira
+    
+    @staticmethod
+    def get_name(obj):
+        status = ''
+        if obj.fields and obj.fields.status:
+            status = obj.fields.status.name
+        return '{} - {}'.format(obj.key, status)
     
     def get_description(self):
         return self.fields or self.object.fields.summary
