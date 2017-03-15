@@ -147,14 +147,6 @@ class IssueLeaf(Leaf):
     
     def get_description(self):
         return self.fields or self.object.fields.summary
-    
-    # def get_actions(self):
-    #     valid_fields = []
-    #     for field in self.object.raw['fields'].items():
-    #         for show in FIELD_WHITE_LIST:
-    #             if re.match(show, field[0]):
-    #                 yield IssueChange(field, self.object, self.jira)
-    #                 break
 
 
 class ProjectLeaf(Leaf):
@@ -410,72 +402,3 @@ class _StatusValues(Source, Jiraya):
     def provides(self):
         yield TextLeaf
 
-
-class SaveChanges(Jiraya, Action):
-    def __init__(self):
-        Action.__init__(self, name="Save issue changes")
-        Jiraya.__init__(self)
-    
-    def item_types(self):
-        yield IssueLeaf
-
-    def valid_for_item(self, item):
-        return item.fields or item.transition
-    
-    def get_description(self):
-        return "Send changes to server"
-
-    def activate(self, item):
-        i = get_issue(item, self.jira)
-        if item.transition:
-            if item.fields:
-                self.jira.transition_issue(i, item.transition, fields=item.fields)
-            else:
-                self.jira.transition_issue(i, item.transition)
-        else:
-            i.update(fields=item.fields)
-        item.fields = None
-        item.transition = None
-
-
-class IssueChange(Jiraya, Action):
-    def __init__(self, field, issue, jira):
-        Action.__init__(self, name="Change " + field[0])
-        Jiraya.__init__(self, jira)
-        self.field = field
-        self.issue = issue
-
-    def requires_object(self):
-        return True
-
-    def activate(self, item, iobj):
-        print(self.field, self.issue, self.jira, item, iobj)
-
-    def valid_object(self, iobj, for_item=None):
-        return type(iobj) is TextLeaf
-
-    def object_source(self, for_item=None):
-        return _IssueFieldValues(self.field, self.issue, self.jira)
-
-
-class _IssueFieldValues(Source, Jiraya):
-    def __init__(self, field, issue, jira):
-        Source.__init__(self, _("Issue " + field[0] + " values"))
-        Jiraya.__init__(self, jira)
-        self.field = field
-        self.issue = issue
-
-    def get_items(self):
-        return ()
-
-    def provides(self):
-        yield TextLeaf
-        yield _IssueField
-
-
-class _IssueField(Leaf, Jiraya):
-    def __init__(self, obj, field, issue, jira):
-        Leaf.__init__(self, obj, "Issue " + field[0] + " value " + obj)
-        Jiraya.__init__(self, jira)
-        self.field = field
-        self.issue = issue
