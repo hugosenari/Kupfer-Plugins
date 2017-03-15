@@ -26,11 +26,16 @@ Require Kupfer https://github.com/kupferlauncher/kupfer/
 Features
 --------
 
-* TODO
+* Index Projects;
+* Index Issues by user defined JQL;
+* Show Issue (open in browser);
+* Add a Comment;
+* Assign.
 
 Install
 -------
 
+pip install jira
 pip install kupfer_plugin_jira_plugin
 
 
