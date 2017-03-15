@@ -1,5 +1,5 @@
 __kupfer_name__ = _('Jira')
-__version__ = '0.1.3'
+__version__ = '0.1.4'
 __author__ = _('Hugo Sena Ribeiro <hugosenari@gmail.com>')
 __description__ = _('''Kupfer plugin to control Jira''')
 
