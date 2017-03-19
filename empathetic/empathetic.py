@@ -10,6 +10,7 @@ __author__ = "Jakh Daven <tuxcanfly@gmail.com>"
 import dbus
 import time
 
+from functools import partial
 from kupfer import icons
 from kupfer import plugin_support
 from kupfer import pretty
@@ -215,13 +216,14 @@ class ContactsSource(AppLeafContentMixin, ToplevelGroupingSource,
                 connection_path = account.Get(ACCOUNT_IFACE, "Connection")
                 bus_name = connection_path.replace("/", ".")[1:]
                 connection = bus.get_object(bus_name, connection_path)
-                channels = connection.ListChannels()
-                self._reply_handle_channels({
-                    'connection': connection,
-                    'bus_name': bus_name,
-                    'bus': bus,
-                    'valid_account': valid_account},
-                    channels)
+                connection.ListChannels(
+                    reply_handler=partial(self._reply_handle_channels, {
+                        'connection':connection,
+                        'bus_name': bus_name,
+                        'bus':bus,
+                        'valid_account':valid_account}),
+                    error_handler=lambda *args, **kwds:
+                        self._error_handle_channels(*args, **kwds),)
             except dbus.DBusException as exc:
                 pretty.print_error(__name__, type(exc).__name__, exc)
     
