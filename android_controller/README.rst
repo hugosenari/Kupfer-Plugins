@@ -16,6 +16,7 @@ Also adb needs to be in PATH
 Features
 --------
 
+* Send to Device
 * Media Control
 * Volume Control
 

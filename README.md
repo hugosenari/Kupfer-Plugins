@@ -5,7 +5,8 @@ My custom plugins for [kupfer](https://github.com/kupferlauncher/kupfer/)
 
 WIP/DONE:
 ---------
-
+* [Android Controller](./android_controller)
+ * Control Android device with ADB
 * [Eclipse](./k2e):
  * Call eclipse common task
 * [Empathetic](./empathetic):
@@ -48,8 +49,6 @@ TODO:
  * Control Internet of Things
 * AWS
  * Control Amazon Web Services
-* ADB
- * Android ADB helper
 * Twitter
  * Post text to twitter
 * Curreios
