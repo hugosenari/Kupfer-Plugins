@@ -213,17 +213,15 @@ class ContactsSource(AppLeafContentMixin, ToplevelGroupingSource,
                     continue
 
                 connection_path = account.Get(ACCOUNT_IFACE, "Connection")
-                connection_iface = connection_path.replace("/", ".")[1:]
-                connection = bus.get_object(connection_iface, connection_path)
-                connection.ListChannels(
-                    reply_handler=lambda *args, **kwds:
-                        self._reply_handle_channels({
-                            'connection':connection,
-                            'connection_iface':connection_iface,
-                            'bus':bus,
-                            'valid_account':valid_account}, *args, **kwds),
-                    error_handler=lambda *args, **kwds:
-                        self._error_handle_channels(*args, **kwds),)
+                bus_name = connection_path.replace("/", ".")[1:]
+                connection = bus.get_object(bus_name, connection_path)
+                channels = connection.ListChannels()
+                self._reply_handle_channels({
+                    'connection': connection,
+                    'bus_name': bus_name,
+                    'bus': bus,
+                    'valid_account': valid_account},
+                    channels)
             except dbus.DBusException as exc:
                 pretty.print_error(__name__, type(exc).__name__, exc)
     
@@ -232,9 +230,8 @@ class ContactsSource(AppLeafContentMixin, ToplevelGroupingSource,
         csize = len(self._contacts)
         for channel in channels:
             try: #ignore channel errors
-                contact_group = opts['bus'].get_object(opts['connection_iface'], channel[0])
+                contact_group = opts['bus'].get_object(opts['bus_name'], channel[0])
                 contacts = None
-                
                 if str(contact_group).find('ImChannel') < 0:
                     contacts = contact_group.Get(CHANNEL_GROUP_IFACE, "Members")
                 if contacts:
@@ -291,4 +288,3 @@ class StatusSource(Source):
 
     def provides(self):
         yield AccountStatus
-
