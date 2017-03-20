@@ -125,7 +125,11 @@ class SendToMobile(Action):
             adb_cmd = ['adb', '-s', device, 'push', leaf.canonical_path(), device_dir]
             prefix, suffix = ([], [])
         else:
-            suffix += [str(leaf,object)]
+            suffix += [                
+                "'{}'".format(
+                    str(leaf.object).replace('"', '\\"').replace("'", "\\'")
+                )
+            ]
         
         return adb_cmd + prefix + suffix
     
