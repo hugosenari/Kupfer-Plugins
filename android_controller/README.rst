@@ -7,7 +7,7 @@ Control your android device with ADB.
 
 Require Kupfer https://github.com/kupferlauncher/kupfer/
 
-Also adb needs to be in PATH
+Also adb needs to be in PATH and your device connect with usb debug
 
 
 * Free software: MIT license
