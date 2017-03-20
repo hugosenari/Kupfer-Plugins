@@ -38,7 +38,7 @@ class DeviceSource(Source):
         Source.__init__(self, _("Connected Devices"))
 
     def get_items(self):
-        out = subprocess.check_output(['adb', 'devices', '-l'])
+        out = subprocess.check_output(['adb', 'devices', '-l']).decode("utf-8")
         for line in out.split('\n')[1:]:
             if line:
                 yield DeviceLeaf(
@@ -93,32 +93,41 @@ class SendToMobile(Action):
         Action.__init__(self, "Send to Device")
     
     def activate(self, leaf, device_leaf):
-        device = device_leaf.object[0]
-        prefix = ['adb', '-s', device, 'shell', 'am', 'start']
-        suffix = ['-a', 'android.intent.action.VIEW', '-d']
-        
+        adb_cmd = ([], [])
         if hasattr(leaf, 'to_android_cmd'):
-            prefix, suffix = leaf.to_android_cmd(device_leaf)
-        elif hasattr(leaf, 'to_android_itent'):
+            adb_cmd = leaf.to_android_cmd(device_leaf)
+        else:
+            adb_cmd = self._to_android_cmd(leaf, device_leaf)
+        if adb_cmd:
+            subprocess.Popen(adb_cmd)
+    
+    def _to_android_cmd(self, leaf, device_leaf):
+        device  = device_leaf.object[0]
+        adb_cmd = ['adb', '-s', device, 'shell']
+        prefix  = ['am', 'start']
+        suffix  = ['-a', 'android.intent.action.VIEW', '-d']
+
+        if hasattr(leaf, 'to_android_itent'):
             suffix = leaf.to_android_itent(device_leaf)
-        elif hasattr(leaf, 'view_itent'):
-            suffix += leaf.view_itent(device_leaf)
-        elif hasattr(leaf, 'insert_itent'):
-            suffix = ['-a', 'android.intent.action.INSERT']
-            suffix += leaf.insert_itent(device_leaf)
         elif isinstance(leaf, ContactLeaf):
             suffix = ['-a', 'android.intent.action.INSERT']
             suffix += ['-t', 'vnd.android.cursor.dir/person']
             for k, v in leaf.object.items():
-                suffix += ['-e', k.lower(), str(v)]
+                if v and not k.startswith('_'):
+                    suffix += [
+                        '-e', k.lower(),
+                        "'{}'".format(
+                            str(v).replace('"', '\\"').replace("'", "\\'")
+                        )
+                    ]
         elif isinstance(leaf, FileLeaf):
             device_dir = __kupfer_settings__['device_dir']
-            prefix = ['adb', '-s', device, 'push']
-            suffix = [leaf.canonical_path(), device_dir]
+            adb_cmd = ['adb', '-s', device, 'push', leaf.canonical_path(), device_dir]
+            prefix, suffix = ([], [])
         else:
             suffix += [str(leaf,object)]
-
-        subprocess.Popen(prefix + suffix)
+        
+        return adb_cmd + prefix + suffix
     
     def item_types(self,):
         yield UrlLeaf
