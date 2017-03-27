@@ -1,4 +1,4 @@
-__kupfer_name__ = _('Kupfer Kering')
+__kupfer_name__ = _('Kupfer Keyring')
 __version__ = '0.1.0'
 __author__ = 'Hugo Sena Ribeiro <hugosenari@gmail.com>'
 __kupfer_sources__ = ("KeysSource",)
