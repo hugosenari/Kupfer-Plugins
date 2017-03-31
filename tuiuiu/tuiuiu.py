@@ -1,19 +1,13 @@
-
-## read plugin api:
-## https://kupferlauncher.github.io/Documentation/PluginAPI.html
-
 __kupfer_name__ = _('Tuiuiu - Twitter')
 __version__ = '0.1.0'
 __author__ = 'Hugo Sena Ribeiro <hugosenari@gmail.com>'
 __description__ = '''Kupfer twitter plugin'''
-
 __kupfer_actions__ = ("UpdateTwitterStatus",)
 
 from kupfer.plugin_support import PluginSettings, OAuth1, check_oauth_support
-__CFG_KEY__ = "tuiuiu_oauth_beta_test"
 __kupfer_settings__ = PluginSettings( 
     {
-        "key" : __CFG_KEY__,
+        "key" : "oauth",
         "label": _("Access Token"),
         "type": OAuth1,
         "value": OAuth1(
@@ -22,7 +16,7 @@ __kupfer_settings__ = PluginSettings(
             url_access="https://api.twitter.com/oauth/access_token",
             url_auth="https://api.twitter.com/oauth/authorize",
             url_request="https://api.twitter.com/oauth/request_token",
-            url_callback="https://github.com/hugosenari/Kupfer-Plugins/"
+            url_callback="https://hugosenari.github.io/Kupfer-Plugins/token.html"
         ),
     }
 )
@@ -36,15 +30,11 @@ class UpdateTwitterStatus(Action):
         Action.__init__(self, name=_("Update Twitter Status"))
 
     def activate(self, leaf):
-        cfg = __kupfer_settings__[__CFG_KEY__]
+        cfg = __kupfer_settings__["oauth"]
         oauth = OAuth1Session(cfg.plugin_id,
                               client_secret=cfg.plugin_secret,
                               resource_owner_key=cfg.user_id,
                               resource_owner_secret=cfg.user_secret)
-        print('action', cfg.plugin_id,
-                              cfg.plugin_secret,
-                              cfg.user_id,
-                              cfg.user_secret)
         protected_url = 'https://api.twitter.com/1.1/statuses/update.json'
         oauth.post(protected_url, params={"status": leaf.object})
 
