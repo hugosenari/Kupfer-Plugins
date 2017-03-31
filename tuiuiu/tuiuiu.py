@@ -2,7 +2,7 @@
 ## read plugin api:
 ## https://kupferlauncher.github.io/Documentation/PluginAPI.html
 
-__kupfer_name__ = _('Tuiuiu')
+__kupfer_name__ = _('Tuiuiu - Twitter')
 __version__ = '0.1.0'
 __author__ = 'Hugo Sena Ribeiro <hugosenari@gmail.com>'
 __description__ = '''Kupfer twitter plugin'''
@@ -35,7 +35,7 @@ class UpdateTwitterStatus(Action):
     def __init__(self):
         Action.__init__(self, name=_("Update Twitter Status"))
 
-    def activate(self, obj):
+    def activate(self, leaf):
         cfg = __kupfer_settings__[__CFG_KEY__]
         oauth = OAuth1Session(cfg.plugin_id,
                               client_secret=cfg.plugin_secret,
@@ -45,9 +45,8 @@ class UpdateTwitterStatus(Action):
                               cfg.plugin_secret,
                               cfg.user_id,
                               cfg.user_secret)
-        protected_url = 'https://api.twitter.com/1.1/account/settings.json'
-        r = oauth.get(protected_url)
-        print(oauth.authorized, r)
+        protected_url = 'https://api.twitter.com/1.1/statuses/update.json'
+        oauth.post(protected_url, params={"status": leaf.object})
 
     def valid_for_item(self, leaf):
         cfg = __kupfer_settings__[__CFG_KEY__]
