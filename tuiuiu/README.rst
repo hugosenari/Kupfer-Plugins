@@ -1,23 +1,12 @@
-===============================
+======
 Tuiuiu
-===============================
-
-
-.. image:: https://img.shields.io/pypi/v/kupfer_plugin_tuiuiu.svg
-        :target: https://pypi.python.org/pypi/kupfer_plugin_tuiuiu
-
-.. image:: https://img.shields.io/travis/hugosenari/kupfer_plugin_tuiuiu.svg
-        :target: https://travis-ci.org/hugosenari/kupfer_plugin_tuiuiu
-
-.. image:: https://readthedocs.org/projects/kupfer_plugin_tuiuiu/badge/?version=latest
-        :target: https://kupfer_plugin_tuiuiu.readthedocs.io/en/latest/?badge=latest
-        :alt: Documentation Status
-
-
+======
 
 Kupfer twitter plugin
 
-Require Kupfer https://github.com/kupferlauncher/kupfer/
+This plugins was created to test kupfer OAuth1 support.
+
+Official kupfer has no support for OAuth1 yet.
 
 
 * Free software: MIT license
@@ -26,7 +15,7 @@ Require Kupfer https://github.com/kupferlauncher/kupfer/
 Features
 --------
 
-* TODO
+* Update twitter status
 
 Install
 -------
