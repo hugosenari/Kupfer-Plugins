@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Your Token</title>
+  <meta charset="utf-8"/>
+</head>
+<style>
+  html, body {
+    height: 100%;
+    padding: 0;
+    margin: 0;
+  }
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  div {
+    display: inline-block;
+  }
+</style>
+<body>
+  <div>
+    <h4>This is your token:</h4>
+    <h1 id="token"></h1>
+    <p>Please inform your token to application.</p>
+  </div>
+  <script type="text/javascript">
+      function getQueryStringValue (key) {
+        var params = window.location.search.split('&');
+        for (var i in params) {
+          var param = params[i];
+          if (key.test(param)) {
+            return param.split('=')[1];
+          }
+        }
+        return '';
+      } 
+      var token_tag = document.getElementById('token');
+      token_tag.innerHTML = getQueryStringValue(/oauth_verifier=/);
+  </script>
+</body>
+</html>
