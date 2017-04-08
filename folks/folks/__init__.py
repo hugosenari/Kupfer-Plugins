@@ -1,6 +1,6 @@
 ## read plugin api:
 ## https://kupferlauncher.github.io/Documentation/PluginAPI.html
-_ = lambda x: x
+#_ = lambda x: x
 __kupfer_name__ = _('Folks (Contacts)')
 __version__ = '0.1.0'
 __author__ = 'Hugo Sena Ribeiro <hugosenari@gmail.com>'
