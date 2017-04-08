@@ -2,19 +2,6 @@
 Folks
 ===============================
 
-
-.. image:: https://img.shields.io/pypi/v/kupfer_plugin_folks.svg
-        :target: https://pypi.python.org/pypi/kupfer_plugin_folks
-
-.. image:: https://img.shields.io/travis/hugosenari/kupfer_plugin_folks.svg
-        :target: https://travis-ci.org/hugosenari/kupfer_plugin_folks
-
-.. image:: https://readthedocs.org/projects/kupfer_plugin_folks/badge/?version=latest
-        :target: https://kupfer_plugin_folks.readthedocs.io/en/latest/?badge=latest
-        :alt: Documentation Status
-
-
-
 List contacts using libfolks as source
 
 Require Kupfer https://github.com/kupferlauncher/kupfer/
@@ -26,14 +13,14 @@ Require Kupfer https://github.com/kupferlauncher/kupfer/
 Features
 --------
 
-* TODO
+* List contacts using libfolks
 
 Install
 -------
 
 pip install kupfer_plugin_folks
 
-Or copy folks.py to ~/.local/share/kupfer/plugins/
+Or copy folks to ~/.local/share/kupfer/plugins/
 
 Credits
 -------
