@@ -1,3 +1,4 @@
+from builtins import issubclass
 
 ## read plugin api:
 ## https://kupferlauncher.github.io/Documentation/PluginAPI.html
@@ -100,6 +101,43 @@ class SendToMobile(Action):
             adb_cmd = self._to_android_cmd(leaf, device_leaf)
         if adb_cmd:
             subprocess.Popen(adb_cmd)
+            
+    def _contact_to_android(self, obj):
+        suffix = ['-a', 'android.intent.action.INSERT']
+        suffix += ['-t', 'vnd.android.cursor.dir/person']
+        for k, v in obj.items():
+            if v and not k.startswith('_'):
+                if isinstance(v, str):
+                    suffix += [
+                        '-e', k.lower(),
+                        "'{}'".format(
+                            str(v).replace('"', '\\"').replace("'", "\\'")
+                        )
+                    ]
+                elif hasattr(v, 'keys'):
+                    for kk, vv in v.items():
+                        suffix += [
+                            '-e', kk.lower(),
+                            "'{}'".format(
+                                str(vv).replace('"', '\\"').replace("'", "\\'")
+                            )
+                        ]
+                elif hasattr(v, 'index'):
+                    for vv in v:
+                        suffix += [
+                            '-e', k.lower(),
+                            "'{}'".format(
+                                str(vv).replace('"', '\\"').replace("'", "\\'")
+                            )
+                        ]
+        return suffix
+
+    def _file_to_android(self, device, leaf):
+        device_dir = __kupfer_settings__['device_dir']
+        adb_cmd = ['adb', '-s', device, 'push',
+                   leaf.canonical_path(), device_dir]
+        prefix, suffix = ([], [])
+        return adb_cmd, prefix, suffix
     
     def _to_android_cmd(self, leaf, device_leaf):
         device  = device_leaf.object[0]
@@ -110,27 +148,15 @@ class SendToMobile(Action):
         if hasattr(leaf, 'to_android_itent'):
             suffix = leaf.to_android_itent(device_leaf)
         elif isinstance(leaf, ContactLeaf):
-            suffix = ['-a', 'android.intent.action.INSERT']
-            suffix += ['-t', 'vnd.android.cursor.dir/person']
-            for k, v in leaf.object.items():
-                if v and not k.startswith('_'):
-                    suffix += [
-                        '-e', k.lower(),
-                        "'{}'".format(
-                            str(v).replace('"', '\\"').replace("'", "\\'")
-                        )
-                    ]
+            suffix = self._contact_to_android(leaf.object)
         elif isinstance(leaf, FileLeaf):
-            device_dir = __kupfer_settings__['device_dir']
-            adb_cmd = ['adb', '-s', device, 'push', leaf.canonical_path(), device_dir]
-            prefix, suffix = ([], [])
+            adb_cmd, prefix, suffix = self._file_to_android(device, leaf)
         else:
             suffix += [                
                 "'{}'".format(
                     str(leaf.object).replace('"', '\\"').replace("'", "\\'")
                 )
             ]
-        
         return adb_cmd + prefix + suffix
     
     def item_types(self,):
