@@ -1,6 +1,7 @@
 from .folks import FolksListener, it_folks, it_attrs, it_changes
-from kupfer.objects import Source
+from kupfer.objects import Source, Action, TextLeaf
 from kupfer.obj import contacts
+from kupfer import utils
    
 
 class FolksContact(contacts.ContactLeaf):
@@ -31,7 +32,7 @@ class FolksSource(Source):
     def __init__(self):
         Source.__init__(self, _("Folks"))
         self.resource = None
-        self.folks = {}
+        self.cached_items = None
     
     def get_items(self):
         for contact in self.folks.values():
@@ -59,3 +60,52 @@ class FolksSource(Source):
 
     def provides(self):
         yield FolksContact
+
+
+class EmailSource(Source):
+    def __init__(self, leaf):
+        Source.__init__(self, _("Emails"))
+        self.resource = leaf.object['email_addresses']
+
+    def item_types(self):
+        yield TextLeaf
+
+    def get_items(self):
+        for i, email in self.resource.items():
+            yield TextLeaf(email)
+
+
+class NewMailAction(Action):
+    def __init__(self):
+        Action.__init__(self, _('Compose Email Using...'))
+
+    def activate(self, leaf, email_leaf=None):
+        if email_leaf:
+            email = email_leaf.object
+            utils.show_url("mailto:%s" % email)
+
+    def item_types(self):
+        yield FolksContact
+
+    def valid_for_item(self, leaf):
+        print('email_addresses' in leaf.object, leaf.object)
+        return 'email_addresses' in leaf.object
+
+    def get_icon_name(self):
+        return "mail-message-new"
+
+    def requires_object(self):
+        return True
+
+    def object_source(self, for_item=None):
+        if for_item:
+            return EmailSource(for_item)
+
+    def object_types(self, for_item=None):
+        yield TextLeaf
+
+    def valid_object(self, iobj, for_item=None):
+        return type(iobj) is TextLeaf
+    
+    def has_result(self):
+        return True

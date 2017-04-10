@@ -6,8 +6,7 @@ __version__ = '0.1.0'
 __author__ = 'Hugo Sena Ribeiro <hugosenari@gmail.com>'
 __description__ = '''List contacts using libfolks as source'''
 __kupfer_sources__ = ("FolksSource",)
+__kupfer_actions__ = ("NewMailAction",)
 
-try:
-    from .plugin import FolksSource
-except:
-    pass
+from .plugin import FolksSource
+from .plugin import NewMailAction
