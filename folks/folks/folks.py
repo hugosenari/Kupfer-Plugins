@@ -7,8 +7,8 @@ from .geeterator import get_iterator
 
 _CHANGED = 'individuals_changed_detailed'
 class FolksListener(object):
-    def __init__(self, on_ready=None, on_change=None):
-        self.agg = Folks.IndividualAggregator.dup()
+    def __init__(self, on_ready=None, on_change=None, aggregator=None):
+        self.agg = aggregator or Folks.IndividualAggregator.dup()
         self.on_ready = on_ready
         self.on_change = on_change
     
