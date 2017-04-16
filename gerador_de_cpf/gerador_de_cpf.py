@@ -1,3 +1,9 @@
+__kupfer_name__ = _("Gerador de CPF")
+__kupfer_sources__ = ("GenCPFSource", )
+__description__ = _("Gera uma lista de CPF")
+__version__ = "0.1.1"
+__author__ = "Hugo Ribeiro"
+
 import random
 import math
 from itertools import repeat
@@ -77,11 +83,7 @@ def cpf():
     #print n1,n2,n3,n4,n5,n6,n7,n8,n9
     return "%d%d%d%s%d%d%d%s%d%d%d%s%d%d" % (n1,n2,n3,'',n4,n5,n6,'',n7,n8,n9,'',d1,d2)
     
-__kupfer_name__ = _("Gerador de CPF")
-__kupfer_sources__ = ("GenCPFSource", )
-__description__ = _("Gera uma lista de CPF")
-__version__ = "0.1.1"
-__author__ = "Hugo Ribeiro"
+
 
 from kupfer.obj.objects import TextLeaf
 from kupfer.obj.grouping import ToplevelGroupingSource

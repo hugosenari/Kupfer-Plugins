@@ -1,13 +1,9 @@
-from builtins import issubclass
-
 ## read plugin api:
 ## https://kupferlauncher.github.io/Documentation/PluginAPI.html
-
 __kupfer_name__ = _('Android Controller')
 __version__ = '0.2.0'
 __author__ = 'Hugo Sena Ribeiro <hugosenari@gmail.com>'
 __description__ = '''Control your android device with ADB'''
-
 __kupfer_sources__ = ("DeviceSource",)
 __kupfer_actions__ = ("SendToMobile",)
 

@@ -1,3 +1,10 @@
+__kupfer_name__ = _("Credit Card Generator")
+__kupfer_sources__ = ("GenCCSource", )
+__description__ = _("Create Random Credit Card Numbers")
+__version__ = "0.1.1"
+__author__ = "Hugo Ribeiro"
+
+
 """
 gencc: A simple program to generate credit card numbers that pass the MOD 10 check
 (Luhn formula).
@@ -170,11 +177,6 @@ def output(title, numbers):
 #voyager = credit_card_number(generator, voyagerPrefixList, 15, 3)
 #print output("Voyager", voyager)
 
-__kupfer_name__ = _("Credit Card Generator")
-__kupfer_sources__ = ("GenCCSource", )
-__description__ = _("Create Random Credit Card Numbers")
-__version__ = "0.1.1"
-__author__ = "Hugo Ribeiro"
 
 from kupfer.obj.objects import TextLeaf
 from kupfer.obj.grouping import ToplevelGroupingSource
