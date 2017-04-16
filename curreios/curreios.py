@@ -72,7 +72,7 @@ class LastStatus(Action):
             info = get_tracking_info(content.decode('iso-8859-1'))
             if info:
                 txt = '-'.join(reversed(info[0]))
-                return TextLeaf(txt, leaf.object)
+                return TextLeaf(leaf.object, txt)
 
     def item_types(self):
         yield TextLeaf
