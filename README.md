@@ -7,6 +7,8 @@ My custom plugins for [kupfer](https://github.com/kupferlauncher/kupfer/)
 
 WIP/DONE:
 ---------
+* [AfterShip](./aftership)
+  * Get package shipping status using [AfterShip](https://www.aftership.com)
 * [Android Controller](./android_controller)
   * Control Android device with ADB
 * [Curreios](./curreios)
