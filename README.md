@@ -9,6 +9,8 @@ WIP/DONE:
 ---------
 * [Android Controller](./android_controller)
   * Control Android device with ADB
+* [Curreios](./curreios)
+  * Get status of Correios/BR package track  
 * [Eclipse](./k2e):
   * Call eclipse common task
 * [Empathetic](./empathetic):
@@ -53,8 +55,6 @@ TODO:
   * Control Amazon Web Services
 * Twitter
   * Post text to twitter
-* Curreios
-  * Get status of Correios/BR track
 * SINESP
   * Search at SINESP/BR for car id
 * Imgur
