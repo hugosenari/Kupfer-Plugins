@@ -2,7 +2,7 @@
 AfterShip
 ===============================
 
-Use [AfterShip](https://www.aftership.com) for package tracking
+Use https://www.aftership.com for package tracking
 
 Require Kupfer https://github.com/kupferlauncher/kupfer/
 
