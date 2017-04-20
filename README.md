@@ -35,6 +35,8 @@ WIP/DONE:
   * Restart running applications
 * [Shortcuts](./shortcuts):
   * List and execute shortcuts of some application
+* [TrackingMore](./trackingmore)
+  * Get package shipping status using [TrackinMore](https://www.trackingmore.com)
 * [URL Encode](./url_encode):
   * Encode/Decode URL
 
