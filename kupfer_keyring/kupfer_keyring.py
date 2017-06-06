@@ -3,21 +3,42 @@ __version__ = '0.1.0'
 __author__ = 'Hugo Sena Ribeiro <hugosenari@gmail.com>'
 __kupfer_sources__ = ("KeysSource",)
 __kupfer_actions__ = ("AddKey", "RemoveKey", "Username")
-__description__ = '''Use kupfer index your passwords
-Use copy action to copy password'''
+__description__ = '''Use kupfer index your passwords. Use copy action to copy password'''
 
+from kupfer.plugin_support import PluginSettings
+__kupfer_settings__ = PluginSettings(
+    {
+        "key" : "search",
+        "label": "Search",
+        "type": str,
+        "value": "{}"
+    }
+)
 
 import keyring
+import json
 from kupfer.objects import Leaf
 from kupfer.objects import Source
 from kupfer.objects import Action, TextLeaf
-
 
 def val_of_first(keys, attr):
     for k in keys:
         if k in attr:
             return attr[k]
 
+
+def filter_keys(items):
+    usr_filter = {}
+    try:
+        j = __kupfer_settings__['search'].replace("'", '"')
+        usr_filter = json.loads(j)
+    except:
+        pass
+    expected = set(usr_filter.items())
+    for obj in items:
+        items = obj.get_attributes().items()
+        if not expected or expected.issubset(items):
+            yield obj
 
 def user_name(obj):
     keys = ('username', 'user', 'login', 'email', 'e-mail')
@@ -55,7 +76,7 @@ class KeysSource(Source):
     
     def get_items(self):
         if self.resource:
-            for obj in self.resource.get_all_items():
+            for obj in filter_keys(self.resource.get_all_items()):
                 yield KeyLeaf(obj)
     
     def initialize(self):
